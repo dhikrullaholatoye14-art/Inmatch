@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Matches</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #222;
+    }
+
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 2rem;
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 2rem;
+    }
+
+    section {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #111827;
+    }
+
+    #matches-list {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .match-card {
+      background: #f1f5f9;
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .match-card img {
+      height: 40px;
+      width: 40px;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    form label {
+      font-weight: bold;
+      display: block;
+      margin: 0.5rem 0 0.3rem;
+    }
+
+    form input, form select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 1rem;
+    }
+
+    #formSubmitBtn {
+      background: #2563eb;
+      color: white;
+      padding: 0.6rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      width: 100%;
+    }
+
+    #formSubmitBtn:hover {
+      background: #1e40af;
+    }
+
+    footer {
+      background: #1e293b;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Manage Matches</h1>
+    <nav>
+      <ul>
+        <li><a href="manage-leagues.html">Back to Leagues</a></li>
+        <li><a href="#" id="logoutBtn">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <!-- Section for displaying the list of matches -->
+    <section id="matches-container">
+      <h2>Matches for League</h2>
+      <div id="matches-list">
+        <!-- Example Match -->
+        <div class="match-card">
+          <div>
+            <img src="team1.png" alt="Team 1"> Team A
+          </div>
+          <span>2 - 1</span>
+          <div>
+            Team B <img src="team2.png" alt="Team 2">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section for adding/editing matches -->
+    <section id="match-form-section">
+      <h2 id="form-title">Add New Match</h2>
+      <form id="match-form">
+        <label for="team1Name">Team 1 Name:</label>
+        <input type="text" id="team1Name" required>
+
+        <label for="team1Logo">Team 1 Logo URL:</label>
+        <input type="url" id="team1Logo" required>
+
+        <label for="team2Name">Team 2 Name:</label>
+        <input type="text" id="team2Name" required>
+
+        <label for="team2Logo">Team 2 Logo URL:</label>
+        <input type="url" id="team2Logo" required>
+
+        <label for="matchTime">Match Time:</label>
+        <input type="datetime-local" id="matchTime" required>
+
+        <label for="matchStatus">Match Status:</label>
+        <select id="matchStatus" required>
+          <option value="upcoming">Upcoming</option>
+          <option value="live">Live</option>
+          <option value="finished">Finished</option>
+        </select>
+
+        <label for="scoreTeam1">Team 1 Score:</label>
+        <input type="number" id="scoreTeam1" min="0" value="0" required>
+
+        <label for="scoreTeam2">Team 2 Score:</label>
+        <input type="number" id="scoreTeam2" min="0" value="0" required>
+
+        <button type="submit" id="formSubmitBtn">Add Match</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2024 Sports Management System</p>
+  </footer>
+
+  <script src="js/manage-matches.js"></script>
+</body>
+</html>

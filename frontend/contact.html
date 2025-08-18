@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Us | InMatch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 dark:text-white font-sans" style="background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/dot-grid.png');" >
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto py-4 text-center px-4">
+      <a href="index.html"><img src="./images/inmatch logo.png" alt="InMatch Logo" class="h-10 mx-auto mb-2"></a>
+      <p class="text-lg">Contact Us</p>
+    </div>
+  </header>
+
+  <!-- Content -->
+  <main class="max-w-4xl mx-auto py-16 px-4">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Get in Touch</h1>
+    <p class="mb-6 text-gray-800">We’d love to hear from you! Whether it’s feedback, partnership requests, or general questions, use the form below:</p>
+
+    <!-- Contact Form -->
+    <form action="https://formspree.io/f/mzzvqzgr" method="POST" class="space-y-4 bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg" id="contactForm">
+      <input type="text" name="name" placeholder="Your Name" required class="w-full p-3 rounded border dark:bg-gray-700 dark:border-gray-600">
+      <input type="email" name="email" placeholder="Your Email" required class="w-full p-3 rounded border dark:bg-gray-700 dark:border-gray-600">
+      <textarea name="message" placeholder="Your Message" rows="5" required class="w-full p-3 rounded border dark:bg-gray-700 dark:border-gray-600"></textarea>
+      <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold">Send Message</button>
+    </form>
+
+    <!-- Success Message -->
+    <p id="successMessage" class="hidden mt-4 text-green-600 font-semibold">✅ Your message has been sent successfully!</p>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-6 text-center text-sm">
+    <p class="text-gray-400">&copy; 2025 InMatch. All rights reserved.</p>
+  </footer>
+
+  <!-- Script for success prompt -->
+  <script>
+    const form = document.getElementById('contactForm');
+    const successMessage = document.getElementById('successMessage');
+
+    form.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: form.method,
+        body: formData,
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (response.ok) {
+        form.reset();
+        successMessage.classList.remove('hidden');
+      } else {
+        alert("❌ Oops! Something went wrong. Please try again.");
+      }
+    });
+  </script>
+</body>
+</html>

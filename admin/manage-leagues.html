@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Leagues</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f5f7fa;
+      color: #333;
+    }
+
+    header {
+      background: #1e3a8a;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    nav ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      padding: 30px;
+    }
+
+    /* League list styles */
+    #leagues-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 20px;
+    }
+
+    .league-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .league-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+
+    .league-card img {
+      max-width: 100px;
+      height: auto;
+      margin-bottom: 15px;
+    }
+
+    .league-card h3 {
+      margin: 0 0 10px;
+      font-size: 1.1rem;
+    }
+
+    .league-actions {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn {
+      border: none;
+      padding: 6px 12px;
+      font-size: 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .btn-edit {
+      background: #2563eb;
+      color: white;
+    }
+
+    .btn-delete {
+      background: #dc2626;
+      color: white;
+    }
+
+    /* Form styles */
+    #league-form-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    }
+
+    #league-form-section h2 {
+      margin-top: 0;
+    }
+
+    form label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+
+    form input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    form button {
+      margin-top: 20px;
+      width: 100%;
+      background: #16a34a;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    form button:hover {
+      background: #15803d;
+    }
+
+    @media (max-width: 768px) {
+      main {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Manage Leagues</h1>
+    <nav>
+      <ul>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="#" id="logoutBtn">Logout</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <section id="leagues-container">
+      <h2>All Leagues</h2>
+      <div id="leagues-list">
+        <!-- Example League Card -->
+        <div class="league-card">
+          <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo.svg" alt="League Logo">
+          <h3>Premier League</h3>
+          <div class="league-actions">
+            <button class="btn btn-edit">Edit</button>
+            <button class="btn btn-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="league-form-section">
+      <h2 id="form-title">Add New League</h2>
+      <form id="league-form">
+        <label for="leagueName">League Name:</label>
+        <input type="text" id="leagueName" required>
+
+        <label for="leagueLogo">League Logo URL:</label>
+        <input type="url" id="leagueLogo" required>
+
+        <button type="submit" id="formSubmitBtn">Add League</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="js/manage-leagues.js"></script>
+</body>
+</html>

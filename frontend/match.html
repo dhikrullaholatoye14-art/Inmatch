@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matches | InMatch</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1e3a8a',
+          },
+          fontFamily: {
+            sans: ['Poppins', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css">
+  <style>
+    .match-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .match-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+    }
+    .live-button, .upcoming-button, .completed-button {
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+    }
+    .live-button {
+      background-color: #ef4444;
+      color: white;
+      animation: pulse 1.5s infinite;
+    }
+    .live-button:hover { background-color: #b91c1c; }
+    .upcoming-button {
+      background-color: #9ca3af;
+      color: white;
+    }
+    .completed-button {
+      background-color: #10b981;
+      color: white;
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+  </style>
+</head>
+
+<body class="bg-gray-100 dark:bg-gray-900 dark:text-white font-sans transition duration-300"
+      style="background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/dot-grid.png');">
+
+  <!-- Header -->
+  <header class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white sticky top-0 z-50 shadow-md">
+    <div class="max-w-7xl mx-auto py-4 px-4 relative flex items-center justify-between">
+      <!-- Back Button -->
+      <a href="index.html" class="absolute left-4 text-white hover:text-yellow-300 text-2xl transition">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+
+      <div class="flex flex-col items-center w-full">
+        <a href="index.html" class="flex items-center space-x-3">
+         <img src="./images/inmatch logo.png" alt="InMatch Logo" class="h-10 mx-auto mb-1">
+        </a>
+        <p class="text-lg">Live Matches - Stay Updated Instantly</p>
+      </div>
+
+      <!-- Admin Login -->
+      <a href="../frontend-admin/admin-login.html" target="_blank" rel="noopener noreferrer"
+         class="text-white hover:text-yellow-300 transition absolute top-4 right-14">
+        <i class="fas fa-user text-2xl"></i>
+      </a>
+
+      <!-- Dark Mode Toggle -->
+      <button id="toggle-theme" class="absolute top-4 right-4 text-white hover:text-yellow-300 text-2xl transition">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Matches Section -->
+  <main class="max-w-7xl mx-auto px-4 py-10" id="match-section">
+    <h2 id="league-name" class="text-3xl font-bold text-gray-800 dark:text-white mb-6 text-center">Loading League...</h2>
+    <div id="matches-container" class="space-y-6"></div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-10 text-center text-sm">
+    <div class="social-icons mb-4">
+      <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-facebook-f"></i></a>
+      <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-twitter"></i></a>
+      <a href="https://www.instagram.com/inmatchdotcom?igsh=MTV5b2tvNWxlMzVlcA%3D%3D&utm_source=qr" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-youtube"></i></a>
+    </div>
+
+    <!-- Community Links -->
+    <div class="mb-6">
+      <a href="https://t.me/+vZ4jd-sDADw0YjM0" target="_blank" class="inline-flex items-center mx-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition">
+        <i class="fab fa-telegram-plane mr-2"></i> Join our Telegram
+      </a>
+      <a href="https://chat.whatsapp.com/LVtILgES9hUGcwn5hZeqee" target="_blank" class="inline-flex items-center mx-3 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition">
+        <i class="fab fa-whatsapp mr-2"></i> Join our WhatsApp
+      </a>
+    </div>
+
+    <nav class="mb-4">
+      <a href="contact.html" class="mx-2 hover:text-indigo-400">Contact Us</a> |
+      <a href="about.html" class="mx-2 hover:text-indigo-400">About</a> |
+      <a href="privacy.html" class="mx-2 hover:text-indigo-400">Privacy Policy</a>
+    </nav>
+    <p class="text-gray-400">&copy; 2025 InMatch. All rights reserved.</p>
+  </footer>
+
+
+  <!-- Back to Top -->
+  <button id="to-top-button" onclick="goToTop()" title="Go To Top"
+    class="hidden fixed z-50 bottom-8 right-8 w-12 h-12 rounded-full bg-blue-600 text-white text-xl font-bold hover:bg-blue-700 transition">
+    ↑
+  </button>
+
+  <script src="./js/match.js"></script>
+</body>
+</html>

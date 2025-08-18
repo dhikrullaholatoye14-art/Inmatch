@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/dd74cbff5f.js" crossorigin="anonymous"></script>
+  <title>Match Details</title>
+  <style>
+  body {
+    background-color: #1C1C1C;
+    font-family: 'Poppins', sans-serif;
+    padding: 20px;
+  }
+
+  .main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 1200px;
+    margin: auto;
+  }
+
+  @media (min-width: 1024px) {
+    .main-content {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+
+  .left-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .left-column {
+      flex: 2;
+    }
+  }
+
+  .stats-section {
+    background-color: #fcf6f6;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(98, 97, 97, 0.6);
+    width: 100%;
+  }
+
+  @media (min-width: 1024px) {
+    .stats-section {
+      flex: 1;
+      max-width: 500px;
+    }
+  }
+
+  .match-container,
+  .video-gallery {
+    background-color: #fcf6f6;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(98, 97, 97, 0.6);
+  }
+
+  .match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+
+  .team-score {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .team img {
+    width: 50px;
+    margin-bottom: 10px;
+  }
+
+  .score {
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+
+  .details {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 0.9rem;
+  }
+
+  .team-details {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .video-container {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .video-container:hover {
+    background-color: #ececec;
+  }
+
+  .play-icon {
+    font-size: 2rem;
+    margin-right: 10px;
+  }
+
+  .video-content {
+    display: none;
+    margin-top: 10px;
+  }
+
+  .video-content video {
+    width: 100%;
+    border-radius: 10px;
+  }
+
+  .stat-item {
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .stat-item:last-child {
+    border-bottom: none;
+  }
+</style>
+</head>
+
+<body style="background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/dot-grid.png');">
+
+  <!-- Sticky Header -->
+  <header class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white sticky top-0 z-50 shadow-md mb-10">
+    <div class="max-w-7xl mx-auto py-4 px-4 relative flex items-center justify-between">
+      <!-- Back Button -->
+      <button onclick="history.back()" class="absolute left-4 text-white hover:text-yellow-300 text-2xl transition">
+        <i class="fas fa-arrow-left"></i>
+      </button>
+
+      <div class="flex flex-col items-center w-full">
+        <a href="index.html" class="flex items-center space-x-3">
+          <img src="./images/inmatch logo.png" alt="InMatch Logo" class="h-10 mx-auto mb-1">
+        </a>
+        <p class="text-lg">Match Details</p>
+      </div>
+
+      <!-- Admin Login -->
+      <a href="../frontend-admin/admin-login.html" target="_blank" rel="noopener noreferrer"
+         class="text-white hover:text-yellow-300 transition absolute top-4 right-14">
+        <i class="fas fa-user text-2xl"></i>
+      </a>
+
+      <!-- Dark Mode Toggle -->
+      <button id="toggle-theme" class="absolute top-4 right-4 text-white hover:text-yellow-300 text-2xl transition">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="left-column">
+      <div class="match-container" id="match-container">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="video-gallery">
+        <div class="video-header text-center text-xl mb-4">Events</div>
+        <div id="videoList" class="video-list">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-header text-center text-xl mb-4">Match Stats</div>
+      <div id="stats-container">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll to Top Button -->
+  <button id="scrollToTopBtn" title="Go to top">
+    <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <script src="./js/matchdetails.js"></script>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 text-white py-10 text-center text-sm mt-10">
+    <div class="social-icons mb-4">
+      <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-facebook-f"></i></a>
+      <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-twitter"></i></a>
+      <a href="https://www.instagram.com/inmatchdotcom?igsh=MTV5b2tvNWxlMzVlcA%3D%3D&utm_source=qr" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-youtube"></i></a>
+    </div>
+
+    <!-- Community Links -->
+    <div class="mb-6">
+      <a href="https://t.me/+vZ4jd-sDADw0YjM0" target="_blank" class="inline-flex items-center mx-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition">
+        <i class="fab fa-telegram-plane mr-2"></i> Join our Telegram
+      </a>
+      <a href="https://chat.whatsapp.com/LVtILgES9hUGcwn5hZeqee" target="_blank" class="inline-flex items-center mx-3 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition">
+        <i class="fab fa-whatsapp mr-2"></i> Join our WhatsApp
+      </a>
+    </div>
+
+    <nav class="mb-4">
+      <a href="contact.html" class="mx-2 hover:text-indigo-400">Contact Us</a> |
+      <a href="about.html" class="mx-2 hover:text-indigo-400">About</a> |
+      <a href="privacy.html" class="mx-2 hover:text-indigo-400">Privacy Policy</a>
+    </nav>
+    <p class="text-gray-400">&copy; 2025 InMatch. All rights reserved.</p>
+  </footer>
+
+
+  <!-- Scroll to Top Script -->
+  <script>
+    const scrollToTopBtn = document.getElementById("scrollToTopBtn");
+
+    window.addEventListener("scroll", () => {
+      if (window.scrollY > 200) {
+        scrollToTopBtn.style.display = "block";
+      } else {
+        scrollToTopBtn.style.display = "none";
+      }
+    });
+
+    scrollToTopBtn.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  </script>
+</body>
+</html>
