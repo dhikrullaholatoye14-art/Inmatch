@@ -4,7 +4,7 @@ if (!token) {
   window.location.href = 'admin-login.html';
 }
 
-const API_BASE_URL = 'http://localhost:3000/api/admins';
+const API_BASE_URL = 'https://inmatch-backend.onrender.com/api/admins';
 
 const addAdminForm = document.getElementById('addAdminForm');
 const adminList = document.getElementById('adminList');

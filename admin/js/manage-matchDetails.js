@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log(`ℹ️ Match ID detected: ${matchId}`);
 
-    const API_MATCH_URL = `http://localhost:3000/api/matches/${matchId}`;
-    const API_MATCH_DETAILS_URL = `http://localhost:3000/api/match-details/${matchId}`;
+    const API_MATCH_URL = `https://inmatch-backend.onrender.com/api/matches/${matchId}`;
+    const API_MATCH_DETAILS_URL = `https://inmatch-backend.onrender.com/api/match-details/${matchId}`;
 
     let matchDetailsExist = false;
 

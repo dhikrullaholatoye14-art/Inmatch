@@ -17,7 +17,7 @@ app.use(express.json());
 
 // CORS configuration to allow all origins, adjust based on your environment
 app.use(cors({
-  origin: '*', // Or specify allowed domains like 'http://localhost:3000'
+  origin: '*', // Or specify allowed domains like 'https://inmatch-backend.onrender.com'
   methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
 }));
 

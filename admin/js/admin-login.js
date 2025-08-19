@@ -9,7 +9,7 @@ document.getElementById('loginForm').addEventListener('submit', async function (
   errorMessage.textContent = ''; // Clear previous errors
 
   try {
-    const response = await fetch('http://localhost:3000/api/admins/login', {
+    const response = await fetch('https://inmatch-backend.onrender.com/api/admins/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),

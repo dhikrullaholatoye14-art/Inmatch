@@ -6,8 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const html = document.documentElement;
 
   const leagueId = new URLSearchParams(window.location.search).get('leagueId');
-  const API_MATCHES = `http://localhost:3000/api/matches/league/${leagueId}`;
-  const API_LEAGUE = `http://localhost:3000/api/leagues/${leagueId}`;
+  const API_MATCHES = `https://inmatch-backend.onrender.com/api/matches/league/${leagueId}`;
+  const API_LEAGUE = `https://inmatch-backend.onrender.com/api/leagues/${leagueId}`;
 
   // Fetch and set league name
   async function fetchLeagueName() {

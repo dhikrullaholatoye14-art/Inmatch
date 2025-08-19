@@ -142,7 +142,7 @@
   // Fetch leagues from server
   async function fetchLeagues() {
     try {
-      const res = await fetch('http://localhost:3000/api/leagues');
+      const res = await fetch('https://inmatch-backend.onrender.com/api/leagues');
       const leagues = await res.json();
 
       // If new leagues exist, append them to the array
