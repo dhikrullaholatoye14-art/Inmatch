@@ -18,6 +18,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
     "express": "^4.21.1",
+    "gopd": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.46",
     "mongodb": "^6.18.0",
@@ -30,5 +31,17 @@
   },
   "engines": {
     "node": "22.x"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }
