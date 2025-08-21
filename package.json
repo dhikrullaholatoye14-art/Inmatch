@@ -1,17 +1,11 @@
 {
-  "name": "live-sport-update",
+  "name": "inmatch-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
@@ -26,22 +20,9 @@
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
     "node-schedule": "^2.1.1",
-    "react-scripts": "^5.0.1",
     "socket.io": "^4.8.1"
   },
   "engines": {
     "node": "22.x"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
   }
 }
