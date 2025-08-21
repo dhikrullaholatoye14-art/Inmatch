@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     // Fetch logged-in admin details
-    const response = await fetch('https://inmatch-backend.onrender.com/api/admins/me', {
+    const response = await fetch('http://localhost:3000/api/admins/me', {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // If superadmin, fetch additional stats
     if (adminDetails.role === 'superadmin') {
       superAdminStats.style.display = 'flex';
-      const statsResponse = await fetch('https://inmatch-backend.onrender.com/api/admins/stats', {
+      const statsResponse = await fetch('http://localhost:3000/api/admins/stats', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

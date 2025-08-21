@@ -4,10 +4,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const toTopButton = document.getElementById('to-top-button');
   const themeToggle = document.getElementById('toggle-theme');
   const html = document.documentElement;
-
+  const API_BASE = "https://inmatch-backend-0csv.onrender.com"; // your Render backend URL
   const leagueId = new URLSearchParams(window.location.search).get('leagueId');
-  const API_MATCHES = `https://inmatch-backend.onrender.com/api/matches/league/${leagueId}`;
-  const API_LEAGUE = `https://inmatch-backend.onrender.com/api/leagues/${leagueId}`;
+  const API_MATCHES = `${API_BASE}/api/matches/league/${leagueId}`;
+  const API_LEAGUE = `${API_BASE}/api/leagues/${leagueId}`;
 
   // Fetch and set league name
   async function fetchLeagueName() {

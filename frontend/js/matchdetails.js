@@ -29,9 +29,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("❌ matchId missing.");
         return;
     }
-
-    const API_MATCH_URL = `https://inmatch-backend.onrender.com/api/matches/${matchId}`;
-    const API_MATCH_DETAILS_URL = `https://inmatch-backend.onrender.com/api/match-details/${matchId}`;
+    const API_BASE = "https://inmatch-backend-0csv.onrender.com";
+    const API_MATCH_URL = `${API_BASE}/api/matches/${matchId}`;
+    const API_MATCH_DETAILS_URL = `${API_BASE}/api/match-details/${matchId}`;
 
     try {
         // Fetch match overview

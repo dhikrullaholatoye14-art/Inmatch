@@ -134,6 +134,7 @@
   const toTopButton = document.getElementById('to-top-button');
   const themeToggle = document.getElementById('toggle-theme');
   const html = document.documentElement;
+  const API_BASE = "https://inmatch-backend-0csv.onrender.com"; // your Render backend URL
 
   let allLeagues = [];
   let displayedCount = 0;
@@ -142,7 +143,7 @@
   // Fetch leagues from server
   async function fetchLeagues() {
     try {
-      const res = await fetch('https://inmatch-backend.onrender.com/api/leagues');
+      const res = await fetch(`${API_BASE}/api/leagues`);
       const leagues = await res.json();
 
       // If new leagues exist, append them to the array
