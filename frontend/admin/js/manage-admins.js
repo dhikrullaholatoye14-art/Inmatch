@@ -3,8 +3,8 @@ if (!token) {
   alert('Unauthorized access! Please login.');
   window.location.href = 'admin-login.html';
 }
-
-const API_BASE_URL = 'http://localhost:3000/api/admins';
+const API_BASE = "https://inmatch-backend-0csv.onrender.com";
+const API_BASE_URL = `${API_BASE}/api/admins`;
 
 const addAdminForm = document.getElementById('addAdminForm');
 const adminList = document.getElementById('adminList');

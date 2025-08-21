@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const addGoalTeam2Btn = document.getElementById('addGoalTeam2');
     const addVideoBtn = document.getElementById('addVideo');
     const logoutBtn = document.getElementById('logoutBtn');
-
+    const API_BASE = "https://inmatch-backend-0csv.onrender.com";
     let matchId = new URLSearchParams(window.location.search).get('matchId');
 
     if (!matchId) {
@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     console.log(`ℹ️ Match ID detected: ${matchId}`);
 
-    const API_MATCH_URL = `http://localhost:3000/api/matches/${matchId}`;
-    const API_MATCH_DETAILS_URL = `http://localhost:3000/api/match-details/${matchId}`;
+    const API_MATCH_URL = `${API_BASE}/api/matches/${matchId}`;
+    const API_MATCH_DETAILS_URL = `${API_BASE}/api/match-details/${matchId}`;
 
     let matchDetailsExist = false;
 

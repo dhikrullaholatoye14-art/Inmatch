@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Get token from localStorage
   const token = localStorage.getItem('authToken');
+  const API_BASE = "https://inmatch-backend-0csv.onrender.com";
 
   if (!token) {
     alert('Unauthorized access! Redirecting to login.');
@@ -19,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     // Fetch logged-in admin details
-    const response = await fetch('http://localhost:3000/api/admins/me', {
+    const response = await fetch(`${API_BASE}/api/admins/me`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
@@ -38,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // If superadmin, fetch additional stats
     if (adminDetails.role === 'superadmin') {
       superAdminStats.style.display = 'flex';
-      const statsResponse = await fetch('http://localhost:3000/api/admins/stats', {
+      const statsResponse = await fetch(`${API_BASE}/api/admins/stats`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,

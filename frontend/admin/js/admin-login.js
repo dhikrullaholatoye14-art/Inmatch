@@ -5,11 +5,11 @@ document.getElementById('loginForm').addEventListener('submit', async function (
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
   const errorMessage = document.getElementById('errorMessage');
-
+  const API_BASE = "https://inmatch-backend-0csv.onrender.com"
   errorMessage.textContent = ''; // Clear previous errors
 
   try {
-    const response = await fetch('http://localhost:3000/api/admins/login', {
+    const response = await fetch(`${API_BASE}/api/admins/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),

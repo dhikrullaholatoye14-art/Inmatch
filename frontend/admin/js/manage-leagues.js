@@ -8,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
   
     let isEditing = false;
     let editingLeagueId = null;
-  
-    const API_URL = 'http://localhost:3000/api/leagues';
+    const API_BASE = "https://inmatch-backend-0csv.onrender.com";
+    const API_URL = `${API_BASE}/api/leagues`;
   
     // Fetch and display leagues
     async function fetchLeagues() {

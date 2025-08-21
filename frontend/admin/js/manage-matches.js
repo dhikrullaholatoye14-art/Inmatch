@@ -16,9 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let isEditing = false;
   let editingMatchId = null;
-
+  const API_BASE = "https://inmatch-backend-0csv.onrender.com";
   const leagueId = new URLSearchParams(window.location.search).get('leagueId');
-  const API_URL = `http://localhost:3000/api/matches`;
+  const API_URL = `${API_BASE}/api/matches`;
 
   // Populate the match status dropdown
   function populateMatchStatusDropdown() {
