@@ -14,6 +14,8 @@ const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
+app.use('/admin', express.static('admin'));
+
 
 // CORS configuration to allow all origins, adjust based on your environment
 app.use(cors({
