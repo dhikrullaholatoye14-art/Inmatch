@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
 const bcrypt = require('bcryptjs');
-const path = require('path');
+
 
 const cors = require('cors');
 
@@ -15,7 +15,7 @@ const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-app.use('/admin', express.static(path.join(__dirname, 'admin')));
+
 
 
 // CORS configuration to allow all origins, adjust based on your environment
