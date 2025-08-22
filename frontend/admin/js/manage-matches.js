@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const scoreTeam1Input = document.getElementById('scoreTeam1');
   const scoreTeam2Input = document.getElementById('scoreTeam2');
   const matchStatusSelect = document.getElementById('matchStatus');
+  const logoutBtn = document.getElementById('logoutBtn');
 
   const statuses = ['upcoming', 'ongoing', 'completed'];
 
@@ -20,33 +21,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const leagueId = new URLSearchParams(window.location.search).get('leagueId');
   const API_URL = `${API_BASE}/api/matches`;
 
-  // ✅ Normalize logo path so filenames always resolve to /images/
+  // Normalize logo path for URLs or local files
   function normalizeLogoPath(value) {
-    if (value.startsWith('http')) return value; // full URL
-    if (value.startsWith('/images/')) return value; // already correct
-    return `/images/${value}`; // default: assume inside /images
+    value = value.trim();
+    if (!value) return '';
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    if (value.startsWith('/images/')) return value;
+    return `/images/${value}`;
   }
 
-  // Populate the match status dropdown
   function populateMatchStatusDropdown() {
     matchStatusSelect.innerHTML = statuses
-      .map((status) => `<option value="${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</option>`)
+      .map(status => `<option value="${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</option>`)
       .join('');
   }
 
-  // Fetch and display matches for the league
   async function fetchMatches() {
     try {
       const response = await fetch(`${API_URL}/league/${leagueId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch matches');
-      }
+      if (!response.ok) throw new Error('Failed to fetch matches');
 
       const matches = await response.json();
 
       matchesList.innerHTML = matches
-        .map(
-          (match) => `
+        .map(match => `
           <div class="match-card">
             <div class="team">
               <img src="${match.team1.logo}" alt="${match.team1.name}" class="team-logo clickable" data-match-id="${match._id}">
@@ -62,10 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <p class="match-score">Score: ${match.scoreTeam1} - ${match.scoreTeam2}</p>
             <button class="edit-btn" data-id="${match._id}">Edit</button>
             <button class="delete-btn" data-id="${match._id}">Delete</button>
-          </div>
-        `
-        )
-        .join('');
+          </div>`).join('');
 
       addMatchDetailsLink();
     } catch (error) {
@@ -73,23 +68,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // Add functionality to navigate to match details page
   function addMatchDetailsLink() {
     const clickableElements = document.querySelectorAll('.clickable');
-    clickableElements.forEach((element) => {
-      element.addEventListener('click', (event) => {
-        const matchId = event.target.dataset.matchId;
+    clickableElements.forEach(el => {
+      el.addEventListener('click', e => {
+        const matchId = e.target.dataset.matchId;
         window.location.href = `manage-matchDetails.html?matchId=${matchId}`;
       });
     });
   }
 
-  // Handle form submission
+  // Handle Add/Edit match form submission
   matchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const team1 = { name: team1NameInput.value.trim(), logo: normalizeLogoPath(team1LogoInput.value.trim()) };
-    const team2 = { name: team2NameInput.value.trim(), logo: normalizeLogoPath(team2LogoInput.value.trim()) };
+    const team1 = { name: team1NameInput.value.trim(), logo: normalizeLogoPath(team1LogoInput.value) };
+    const team2 = { name: team2NameInput.value.trim(), logo: normalizeLogoPath(team2LogoInput.value) };
     const time = matchTimeInput.value;
     const status = matchStatusSelect.value;
     const scoreTeam1 = parseInt(scoreTeam1Input.value, 10) || 0;
@@ -107,14 +101,14 @@ document.addEventListener('DOMContentLoaded', () => {
         await fetch(`${API_URL}/${editingMatchId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(matchData),
+          body: JSON.stringify(matchData)
         });
         alert('Match updated successfully!');
       } else {
         await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(matchData),
+          body: JSON.stringify(matchData)
         });
         alert('Match added successfully!');
       }
@@ -143,8 +137,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const matchTime = new Date(matchCard.querySelector('.match-time').textContent.split(': ')[1])
         .toISOString()
         .slice(0, 16);
-      const [scoreTeam1, scoreTeam2] = matchCard
-        .querySelector('.match-score')
+      const [scoreTeam1, scoreTeam2] = matchCard.querySelector('.match-score')
         .textContent.split(': ')[1]
         .split(' - ');
 
@@ -155,41 +148,36 @@ document.addEventListener('DOMContentLoaded', () => {
       matchTimeInput.value = matchTime;
       scoreTeam1Input.value = scoreTeam1;
       scoreTeam2Input.value = scoreTeam2;
+      matchStatusSelect.value = matchCard.querySelector('.match-status').textContent.split(': ')[1];
 
-      isEditing = true;
       editingMatchId = event.target.dataset.id;
-
+      isEditing = true;
       formTitle.textContent = 'Edit Match';
       formSubmitBtn.textContent = 'Update Match';
     }
   });
 
-  // Delete match
+  // ✅ Delete match
   matchesList.addEventListener('click', async (event) => {
     if (event.target.classList.contains('delete-btn')) {
       const matchId = event.target.dataset.id;
+      if (!confirm('Are you sure you want to delete this match?')) return;
 
-      if (confirm('Are you sure you want to delete this match?')) {
-        try {
-          const response = await fetch(`${API_URL}/${matchId}`, { method: 'DELETE' });
+      try {
+        const response = await fetch(`${API_URL}/${matchId}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('Failed to delete match');
 
-          if (!response.ok) {
-            alert('Error: Could not delete the match. Please try again.');
-            return;
-          }
-
-          alert('Match deleted successfully!');
-          fetchMatches();
-        } catch (error) {
-          console.error('Error deleting match:', error);
-        }
+        alert('Match deleted successfully!');
+        fetchMatches();
+      } catch (error) {
+        console.error('Error deleting match:', error);
       }
     }
   });
 
-  // Logout functionality
+  // Logout
   logoutBtn.addEventListener('click', () => {
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
     window.location.href = 'admin-login.html';
   });
 

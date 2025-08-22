@@ -11,12 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const API_BASE = "https://inmatch-backend-0csv.onrender.com";
   const API_URL = `${API_BASE}/api/leagues`;
 
-  // ✅ Normalize logo path before saving
-  function normalizeLogoPath(logo) {
-    if (!logo.startsWith('http') && !logo.startsWith('/images/')) {
-      return `/images/${logo}`;
-    }
-    return logo;
+  // ✅ Normalize logo path before saving and displaying
+  function normalizeLogoPath(value) {
+    if (value.startsWith('http')) return value; 
+    if (value.startsWith('/images/')) return value;
+    return `/images/${value}`; 
   }
 
   // Fetch and display leagues
@@ -28,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
       leaguesList.innerHTML = leagues.map(league => `
         <div class="league-card">
           <a href="manage-matches.html?leagueId=${league._id}">
-            <img src="${league.logo}" alt="${league.name}" class="league-logo">
+            <img src="${normalizeLogoPath(league.logo)}" alt="${league.name}" class="league-logo">
           </a>
           <a href="manage-matches.html?leagueId=${league._id}">
             <h3>${league.name}</h3>
@@ -53,12 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
-    // ✅ Normalize before sending to backend
-    logo = normalizeLogoPath(logo);
+    logo = normalizeLogoPath(logo); // Normalize before sending to backend
 
     try {
       if (isEditing) {
-        // Update league
         await fetch(`${API_URL}/${editingLeagueId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
@@ -66,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         alert('League updated successfully!');
       } else {
-        // Add new league
         await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -75,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('League added successfully!');
       }
 
-      // Reset form and refresh leagues
       leagueForm.reset();
       isEditing = false;
       editingLeagueId = null;
@@ -124,12 +119,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Logout functionality
+  // Logout
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('authToken');
     window.location.href = 'admin-login.html';
   });
 
-  // Initialize page
   fetchLeagues();
 });
