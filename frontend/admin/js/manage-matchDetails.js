@@ -57,13 +57,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function fetchMatchOverview() {
         try {
-            console.log("📡 Fetching match overview...");
             const response = await fetch(API_MATCH_URL);
             if (!response.ok) throw new Error('Failed to fetch match overview');
 
             const { match } = await response.json();
-            if (!match || !match.team1 || !match.team2) throw new Error("Match data is incomplete!");
-
             matchInfoContainer.innerHTML = `
                 <div>
                     <img src="${match.team1.logo}" alt="${match.team1.name} Logo" width="50">
@@ -75,7 +72,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Score: ${match.scoreTeam1 ?? '0'} - ${match.scoreTeam2 ?? '0'}</p>
                 </div>
             `;
-            console.log("✅ Match overview updated.");
         } catch (error) {
             console.error('Error fetching match overview:', error);
         }
@@ -83,20 +79,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function fetchMatchDetails() {
         try {
-            console.log("📡 Fetching match details...");
             const response = await fetch(API_MATCH_DETAILS_URL);
             if (!response.ok) {
-                console.warn('⚠️ No match details available.');
                 matchDetailsExist = false;
                 return;
             }
 
             const { details } = await response.json();
-            if (!details) throw new Error("Match details are empty");
-
             matchDetailsExist = true;
 
-            console.log("🔄 Updating UI with match details...");
             matchStatsContainer.innerHTML = `
                 <h3>Match Statistics</h3>
                 <p><strong>Ball Possession:</strong> ${details.stats?.possession || "0 - 0"}</p>
@@ -105,20 +96,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p><strong>Fouls:</strong> ${details.stats?.fouls || "0 - 0"}</p>
             `;
 
-            // Append goals
+            // Goals
             const goalsTeam1 = details.goalsDetails?.team1 || [];
             const goalsTeam2 = details.goalsDetails?.team2 || [];
             if (goalsTeam1.length || goalsTeam2.length) {
                 matchStatsContainer.innerHTML += `<h3>Goals</h3>`;
                 if (goalsTeam1.length) {
-                    matchStatsContainer.innerHTML += `<p><strong>Team 1 Goals:</strong><br>${goalsTeam1.map(goal => `${goal.player} (${goal.time} mins)`).join(', ')}</p>`;
+                    matchStatsContainer.innerHTML += `<p><strong>Team 1:</strong> ${goalsTeam1.map(goal => `${goal.player} (${goal.time})`).join(', ')}</p>`;
                 }
                 if (goalsTeam2.length) {
-                    matchStatsContainer.innerHTML += `<p><strong>Team 2 Goals:</strong><br>${goalsTeam2.map(goal => `${goal.player} (${goal.time} mins)`).join(', ')}</p>`;
+                    matchStatsContainer.innerHTML += `<p><strong>Team 2:</strong> ${goalsTeam2.map(goal => `${goal.player} (${goal.time})`).join(', ')}</p>`;
                 }
             }
 
-            // ✅ Append videos (inline player for direct files; link otherwise)
+            // ✅ Videos
             const videos = details.videos || [];
             if (videos.length) {
                 matchStatsContainer.innerHTML += `<h3>Match Videos</h3><div id="videos-render"></div>`;
@@ -126,17 +117,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 videos.forEach(video => {
                     const src = video.videoUrl || '';
                     if (isDirectVideoFile(src)) {
-                        const wrapper = document.createElement('div');
-                        wrapper.style.marginBottom = '8px';
-                        wrapper.innerHTML = `
-                            <div><strong>${video.title || 'Video'}</strong></div>
-                            <video src="${src}" width="320" controls></video>
+                        videosRender.innerHTML += `
+                            <div>
+                                <strong>${video.title || 'Video'}</strong><br>
+                                <video src="${src}" width="320" controls></video>
+                            </div>
                         `;
-                        videosRender.appendChild(wrapper);
                     } else {
-                        const item = document.createElement('div');
-                        item.innerHTML = `<a href="${src}" target="_blank">${video.title || src}</a>`;
-                        videosRender.appendChild(item);
+                        videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
                     }
                 });
             }
@@ -153,8 +141,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             videoDetailsContainer.innerHTML = '';
             videos.forEach(video => addVideoInput(video.title, video.videoUrl));
-
-            console.log("✅ Match details updated successfully.");
         } catch (error) {
             console.error('Error fetching match details:', error);
         }
@@ -162,7 +148,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     matchDetailsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log("📝 Submitting updated match details...");
 
         const updatedStats = {
             possession: ballPossessionInput.value,
@@ -182,19 +167,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             .filter(video => video.title && video.videoUrl);
 
         const updatedGoalsTeam1 = Array.from(goalDetailsContainer.querySelectorAll('.goal-input.goal-team1'))
-            .map(goal => {
-                const player = goal.querySelector('input[placeholder="Player Name"]').value.trim();
-                const time = goal.querySelector('input[placeholder="Goal Time"]').value.trim();
-                return { player, time };
-            })
+            .map(goal => ({
+                player: goal.querySelector('input[placeholder="Player Name"]').value.trim(),
+                time: goal.querySelector('input[placeholder="Goal Time"]').value.trim()
+            }))
             .filter(goal => goal.player && goal.time);
 
         const updatedGoalsTeam2 = Array.from(goalDetailsContainer.querySelectorAll('.goal-input.goal-team2'))
-            .map(goal => {
-                const player = goal.querySelector('input[placeholder="Player Name"]').value.trim();
-                const time = goal.querySelector('input[placeholder="Goal Time"]').value.trim();
-                return { player, time };
-            })
+            .map(goal => ({
+                player: goal.querySelector('input[placeholder="Player Name"]').value.trim(),
+                time: goal.querySelector('input[placeholder="Goal Time"]').value.trim()
+            }))
             .filter(goal => goal.player && goal.time);
 
         const payload = {
@@ -206,8 +189,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         };
 
-        console.log("📤 Sending payload:", payload);
-
         try {
             const response = await fetch(API_MATCH_DETAILS_URL, {
                 method: matchDetailsExist ? "PATCH" : "POST",
@@ -217,7 +198,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (!response.ok) throw new Error("Failed to update match details");
 
-            console.log("✅ Match details updated successfully");
             await fetchMatchDetails();
         } catch (error) {
             console.error("❌ Error updating match details:", error);
@@ -250,11 +230,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     logoutBtn.addEventListener('click', () => {
         localStorage.removeItem('authToken');
-        console.log("🔒 Logging out...");
         window.location.href = 'admin-login.html';
     });
 
-    console.log("📡 Fetching initial match data...");
     await fetchMatchOverview();
     await fetchMatchDetails();
 });
