@@ -1,83 +1,85 @@
 document.addEventListener("DOMContentLoaded", async () => {
-    const matchContainer = document.getElementById("match-container");
-    const videoList = document.getElementById("videoList");
-    const statsContainer = document.getElementById("stats-container");
+  const matchContainer = document.getElementById("match-container");
+  const videoList = document.getElementById("videoList");
+  const statsContainer = document.getElementById("stats-container");
 
-    // Fetch match details
-    async function fetchMatchDetails() {
-        try {
-            const response = await fetch("/api/matches");
-            const matches = await response.json();
+  // 🔹 Extract matchId from query string (?id=123)
+  const urlParams = new URLSearchParams(window.location.search);
+  const matchId = urlParams.get("id");
 
-            matchContainer.innerHTML = "";
-            matches.forEach((match) => {
-                const matchDiv = document.createElement("div");
-                matchDiv.classList.add("match-item");
+  if (!matchId) {
+    matchContainer.innerHTML = "<p>No match ID provided in URL</p>";
+    return;
+  }
 
-                matchDiv.innerHTML = `
-                    <h3>${match.homeTeam} vs ${match.awayTeam}</h3>
-                    <p>Date: ${new Date(match.date).toLocaleString()}</p>
-                    <p>Score: ${match.score || "Not updated yet"}</p>
-                `;
+  // 🔹 Fetch Match Details
+  async function fetchMatchDetails() {
+    try {
+      const res = await fetch(`/api/matchDetails/${matchId}`);
+      if (!res.ok) throw new Error(`Failed to fetch match details: ${res.status}`);
+      const match = await res.json();
 
-                matchContainer.appendChild(matchDiv);
-            });
-        } catch (error) {
-            console.error("Error fetching match details:", error);
-        }
+      matchContainer.innerHTML = `
+        <h2>${match.homeTeam} vs ${match.awayTeam}</h2>
+        <p>Date: ${new Date(match.date).toLocaleString()}</p>
+        <p>Score: ${match.homeScore} - ${match.awayScore}</p>
+      `;
+    } catch (err) {
+      console.error("Error fetching match details:", err);
+      matchContainer.innerHTML = `<p>Error loading match details</p>`;
     }
+  }
 
-    // Fetch videos
-    async function fetchVideos() {
-        try {
-            const response = await fetch("/api/videos");
-            const videos = await response.json();
+  // 🔹 Fetch Videos
+  async function fetchVideos() {
+    try {
+      const res = await fetch(`/api/matchDetails/${matchId}/videos`);
+      if (!res.ok) throw new Error(`Failed to fetch videos: ${res.status}`);
+      const videos = await res.json();
 
-            videoList.innerHTML = "";
-            videos.forEach((video) => {
-                const videoDiv = document.createElement("div");
-                videoDiv.classList.add("video-item");
+      videoList.innerHTML = "";
+      if (videos.length === 0) {
+        videoList.innerHTML = "<p>No videos available</p>";
+        return;
+      }
 
-                // ✅ Corrected path to match "public/uploads/videos/"
-                videoDiv.innerHTML = `
-                    <h4>${video.title}</h4>
-                    <video controls width="320">
-                        <source src="/uploads/videos/${video.filename}" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                `;
-
-                videoList.appendChild(videoDiv);
-            });
-        } catch (error) {
-            console.error("Error fetching videos:", error);
-        }
+      videos.forEach((video) => {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${video.url}" target="_blank">${video.title}</a>`;
+        videoList.appendChild(li);
+      });
+    } catch (err) {
+      console.error("Error fetching videos:", err);
+      videoList.innerHTML = `<p>Error loading videos</p>`;
     }
+  }
 
-    // Fetch stats
-    async function fetchStats() {
-        try {
-            const response = await fetch("/api/stats");
-            const stats = await response.json();
+  // 🔹 Fetch Stats
+  async function fetchStats() {
+    try {
+      const res = await fetch(`/api/matchDetails/${matchId}/stats`);
+      if (!res.ok) throw new Error(`Failed to fetch stats: ${res.status}`);
+      const stats = await res.json();
 
-            statsContainer.innerHTML = "";
-            stats.forEach((stat) => {
-                const statDiv = document.createElement("div");
-                statDiv.classList.add("stat-item");
+      statsContainer.innerHTML = "";
+      if (!stats || Object.keys(stats).length === 0) {
+        statsContainer.innerHTML = "<p>No stats available</p>";
+        return;
+      }
 
-                statDiv.innerHTML = `
-                    <p><strong>${stat.player}</strong> - ${stat.action}</p>
-                `;
-
-                statsContainer.appendChild(statDiv);
-            });
-        } catch (error) {
-            console.error("Error fetching stats:", error);
-        }
+      for (const key in stats) {
+        const p = document.createElement("p");
+        p.textContent = `${key}: ${stats[key]}`;
+        statsContainer.appendChild(p);
+      }
+    } catch (err) {
+      console.error("Error fetching stats:", err);
+      statsContainer.innerHTML = `<p>Error loading stats</p>`;
     }
+  }
 
-    // Initial fetch
-    fetchMatchDetails();
-    fetchVideos();
-    fetchStats();
+  // 🔹 Initial fetch calls
+  await fetchMatchDetails();
+  await fetchVideos();
+  await fetchStats();
 });
