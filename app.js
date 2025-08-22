@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
 const bcrypt = require('bcryptjs');
+const path = require('path');
 
 
 const cors = require('cors');
@@ -16,6 +17,12 @@ const app = express();
 // Middleware to parse JSON bodies
 app.use(express.json());
 
+const uploadRoutes = require('./routes/upload'); 
+app.use('/admin', uploadRoutes);
+
+
+// Make files in public/uploads available at /uploads/...
+app.use('/uploads', require('express').static(path.join(__dirname, 'public', 'uploads')));
 
 
 // CORS configuration to allow all origins, adjust based on your environment
