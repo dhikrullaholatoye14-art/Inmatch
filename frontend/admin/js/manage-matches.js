@@ -20,6 +20,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const leagueId = new URLSearchParams(window.location.search).get('leagueId');
   const API_URL = `${API_BASE}/api/matches`;
 
+  // ✅ Normalize logo path so filenames always resolve to /images/
+  function normalizeLogoPath(value) {
+    if (value.startsWith('http')) return value; // full URL
+    if (value.startsWith('/images/')) return value; // already correct
+    return `/images/${value}`; // default: assume inside /images
+  }
+
   // Populate the match status dropdown
   function populateMatchStatusDropdown() {
     matchStatusSelect.innerHTML = statuses
@@ -81,8 +88,8 @@ document.addEventListener('DOMContentLoaded', () => {
   matchForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const team1 = { name: team1NameInput.value.trim(), logo: team1LogoInput.value.trim() };
-    const team2 = { name: team2NameInput.value.trim(), logo: team2LogoInput.value.trim() };
+    const team1 = { name: team1NameInput.value.trim(), logo: normalizeLogoPath(team1LogoInput.value.trim()) };
+    const team2 = { name: team2NameInput.value.trim(), logo: normalizeLogoPath(team2LogoInput.value.trim()) };
     const time = matchTimeInput.value;
     const status = matchStatusSelect.value;
     const scoreTeam1 = parseInt(scoreTeam1Input.value, 10) || 0;
