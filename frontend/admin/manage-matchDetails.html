@@ -1,49 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Match Details</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Match Details</title>
+    <style>
+        /* Reset & Base */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        body {
+            background-color: #f4f6f8;
+            color: #333;
+            padding: 20px;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: #1e3a8a;
+            border-radius: 0px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #fcfafa;
+        }
+        header h3 {
+            color: #fcfafa;
+        }
+        header button {
+            background: #ff4d4d;
+            border: none;
+            padding: 8px 14px;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        /* Main Container */
+        main {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        /* Match Card */
+        .match-card, .match-stats {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        /* Form Styling */
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        form h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+            color: #007bff;
+        }
+        label {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        input {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 4px rgba(0,123,255,0.3);
+        }
+
+        /* Buttons */
+        button[type="submit"] {
+            background: #007bff;
+            border: none;
+            padding: 12px;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 1rem;
+        }
+        button[type="submit"]:hover {
+            background: #0056b3;
+        }
+        .action-btn {
+            background: #28a745;
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .action-btn:hover {
+            background: #218838;
+        }
+
+        /* Goal & Video Sections */
+        #goal-details, #video-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header, form {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            header button {
+                margin-top: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>Manage Match Details</h1>
+    <header>
+        <h1>Manage Match Details</h1>
+        <h3 id="logoutBtn">Logout</h3>
+    </header>
 
-  <!-- Add Match Form -->
-  <form id="addMatchForm">
-    <label>Home Team: <input type="text" id="homeTeam" required></label>
-    <label>Away Team: <input type="text" id="awayTeam" required></label>
-    <label>Match Date: 
-      <!-- native date input with calendar popup -->
-      <input type="date" id="matchDate" required>
-    </label>
-    <label>Venue: <input type="text" id="venue" required></label>
-    <button type="submit">Add Match</button>
-  </form>
+    <main>
+        <!-- Match Overview -->
+        <section id="match-container">
+            <div id="match-info" class="match-card">
+                <h2>Match Overview</h2>
+                <!-- Match info will load here -->
+            </div>
 
-  <hr>
+            <div id="match-stats" class="match-stats">
+                <h2>Match Statistics</h2>
+                <!-- Stats will load here -->
+            </div>
 
-  <!-- Match List -->
-  <div id="match-container"></div>
+            <!-- Form -->
+            <form id="match-details-form">
+                <h3>Edit Match Statistics</h3>
 
-  <hr>
+                <div>
+                    <label>Ball Possession (%)</label>
+                    <input type="text" id="ballPossession" required>
+                </div>
+                <div>
+                    <label>Shots on Target</label>
+                    <input type="text" id="shotsOnTarget" required>
+                </div>
+                <div>
+                    <label>Corners</label>
+                    <input type="text" id="corners" required>
+                </div>
+                <div>
+                    <label>Fouls</label>
+                    <input type="text" id="fouls" required>
+                </div>
 
-  <!-- Match Stats -->
-  <div id="stats-container"></div>
+                <h3>Goal Details</h3>
+                <div id="goal-details"></div>
+                <button type="button" class="action-btn" id="addGoalTeam1">➕ Add Goal - Team 1</button>
+                <button type="button" class="action-btn" id="addGoalTeam2">➕ Add Goal - Team 2</button>
 
-  <hr>
+                <h3>Videos</h3>
+                <div id="video-details"></div>
+                <button type="button" class="action-btn" id="addVideo">➕ Add Video</button>
 
-  <!-- Video Upload -->
-  <h2>Upload Match Video</h2>
-  <form id="addVideoForm">
-    <label>Video Title: <input type="text" id="videoTitle" required></label>
-    <label>Video URL (YouTube, etc.): <input type="url" id="videoURL"></label>
-    <label>Or Upload File: <input type="file" id="videoFile" accept="video/*"></label>
-    <button type="submit">Upload Video</button>
-  </form>
+                <button type="submit">💾 Save Match Details</button>
+            </form>
+        </section>
+    </main>
 
-  <div id="videoList"></div>
-
-  <script src="manage-matchDetails.js"></script>
+    <script src="./js/manage-matchDetails.js"></script>
 </body>
 </html>
