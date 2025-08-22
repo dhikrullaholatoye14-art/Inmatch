@@ -4,168 +4,214 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manage Match Details</title>
-  <link rel="stylesheet" href="styles.css">
   <style>
-    body {
+    /* Reset & Base */
+    * {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
     }
 
-    /* Sticky Header */
+    body {
+      background-color: #f4f6f8;
+      color: #333;
+      padding: 20px;
+    }
+
+    /* Header */
     header {
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: #222;
-      color: #fff;
-      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding: 15px 25px;
+      background: #1e3a8a;
+      border-radius: 0px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 25px;
     }
 
-    header .logo {
-      font-size: 20px;
-      font-weight: bold;
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #fcfafa;
     }
 
-    header nav a {
+    header h3 {
+      color: #fcfafa;
+      cursor: pointer;
+    }
+
+    header button {
+      background: #ff4d4d;
+      border: none;
+      padding: 8px 14px;
       color: #fff;
-      margin: 0 10px;
-      text-decoration: none;
-    }
-
-    header .icons {
-      display: flex;
-      align-items: center;
-    }
-
-    header .icons a {
-      margin-left: 15px;
-      color: #fff;
-      text-decoration: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
     }
 
     /* Main Container */
     main {
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    /* Match Card */
+    .match-card,
+    .match-stats {
+      background: #fff;
+      border-radius: 10px;
       padding: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
     }
 
-    h2 {
-      margin-top: 30px;
-      margin-bottom: 15px;
-      color: #333;
-    }
-
-    section {
+    /* Form Styling */
+    form {
       background: #fff;
       padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    form h3 {
+      margin-bottom: 10px;
+      font-size: 1.2rem;
+      color: #007bff;
+    }
+
+    label {
+      font-weight: 500;
+      margin-bottom: 5px;
+    }
+
+    input {
+      padding: 10px;
       border-radius: 8px;
-      margin-bottom: 25px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border: 1px solid #ccc;
+      outline: none;
+      transition: 0.3s;
     }
 
-    /* Video list */
-    #videoList li {
-      margin: 5px 0;
-      padding: 8px;
-      background: #eee;
-      border-radius: 4px;
+    input:focus {
+      border-color: #007bff;
+      box-shadow: 0 0 4px rgba(0,123,255,0.3);
     }
 
-    /* Footer */
-    footer {
-      background: #222;
+    /* Buttons */
+    button[type="submit"] {
+      background: #007bff;
+      border: none;
+      padding: 12px;
       color: #fff;
-      text-align: center;
-      padding: 15px;
-      margin-top: 30px;
-      position: relative;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+      font-size: 1rem;
     }
 
-    footer .links a {
-      color: #fff;
-      margin: 0 10px;
-      text-decoration: none;
+    button[type="submit"]:hover {
+      background: #0056b3;
     }
 
-    /* Back to Top */
-    #backToTop {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #333;
+    .action-btn {
+      background: #28a745;
       color: #fff;
-      padding: 10px 15px;
-      border-radius: 50%;
+      padding: 8px 14px;
+      border-radius: 8px;
       border: none;
       cursor: pointer;
-      display: none;
+      transition: 0.3s;
+    }
+
+    .action-btn:hover {
+      background: #218838;
+    }
+
+    /* Goal & Video Sections */
+    #goal-details,
+    #video-details {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px 0;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header,
+      form {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      header h3 {
+        margin-top: 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Sticky Header -->
   <header>
-    <div class="logo">LiveSports Admin</div>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="leagues.html">Leagues</a>
-      <a href="matches.html">Matches</a>
-    </nav>
-    <div class="icons">
-      <a href="frontend-admin/admin-login.html">🔑 Login</a>
-    </div>
+    <h1>Manage Match Details</h1>
+    <h3 id="logoutBtn">Logout</h3>
   </header>
 
-  <!-- Main -->
   <main>
-    <!-- Matches Section -->
-    <section>
-      <h2>Matches</h2>
-      <div id="match-container">Loading matches...</div>
-    </section>
+    <!-- Match Overview -->
+    <section id="match-container">
+      <div id="match-info" class="match-card">
+        <h2>Match Overview</h2>
+        <!-- Match info will load here -->
+      </div>
 
-    <!-- Videos Section -->
-    <section>
-      <h2>Match Videos</h2>
-      <ul id="videoList"></ul>
-    </section>
+      <div id="match-stats" class="match-stats">
+        <h2>Match Statistics</h2>
+        <!-- Stats will load here -->
+      </div>
 
-    <!-- Stats Section -->
-    <section>
-      <h2>Match Statistics</h2>
-      <div id="stats-container">Loading stats...</div>
+      <!-- Form -->
+      <form id="match-details-form">
+        <h3>Edit Match Statistics</h3>
+        <div>
+          <label>Ball Possession (%)</label>
+          <input type="text" id="ballPossession" required>
+        </div>
+        <div>
+          <label>Shots on Target</label>
+          <input type="text" id="shotsOnTarget" required>
+        </div>
+        <div>
+          <label>Corners</label>
+          <input type="text" id="corners" required>
+        </div>
+        <div>
+          <label>Fouls</label>
+          <input type="text" id="fouls" required>
+        </div>
+
+        <h3>Goal Details</h3>
+        <div id="goal-details"></div>
+        <button type="button" class="action-btn" id="addGoalTeam1">➕ Add Goal - Team 1</button>
+        <button type="button" class="action-btn" id="addGoalTeam2">➕ Add Goal - Team 2</button>
+
+        <h3>Videos</h3>
+        <div id="video-details"></div>
+        <button type="button" class="action-btn" id="addVideo">➕ Add Video</button>
+
+        <button type="submit">💾 Save Match Details</button>
+      </form>
     </section>
   </main>
 
-  <!-- Footer -->
-  <footer>
-    <div class="links">
-      <a href="#">Contact</a>
-      <a href="#">About</a>
-      <a href="#">Privacy</a>
-    </div>
-    <p>&copy; 2025 LiveSports Update</p>
-  </footer>
-
-  <!-- Back to Top -->
-  <button id="backToTop">↑</button>
-
-  <script>
-    // Back to top button script
-    const backToTop = document.getElementById("backToTop");
-    window.addEventListener("scroll", () => {
-      if (window.scrollY > 300) {
-        backToTop.style.display = "block";
-      } else {
-        backToTop.style.display = "none";
-      }
-    });
-    backToTop.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  </script>
+  <script src="./js/manage-matchDetails.js"></script>
 </body>
 </html>
