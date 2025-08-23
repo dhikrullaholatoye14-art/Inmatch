@@ -6,6 +6,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const cors = require('cors');
 
 
 const cors = require('cors');
@@ -15,6 +16,13 @@ const videoRoutes = require('./routes/video');
 dotenv.config();
 
 const app = express();
+
+
+app.use(cors({
+    origin: 'https://www.inmatch.com.ng', // Only your frontend
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+}));
+
 
 // Middleware to parse JSON bodies
 app.use(express.json());
