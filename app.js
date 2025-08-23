@@ -8,94 +8,82 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const cors = require('cors');
 
-
-const cors = require('cors');
+// Routes
 const videoRoutes = require('./routes/video');
-
-
-dotenv.config();
-
-const app = express();
-
-
-app.use(cors({
-    origin: 'https://www.inmatch.com.ng', // Only your frontend
-    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
-}));
-
-
-// Middleware to parse JSON bodies
-app.use(express.json());
-app.use('/uploads/videos', express.static(path.join(__dirname, 'uploads/videos')));
-const uploadRoutes = require('./routes/upload'); 
-app.use('/admin', uploadRoutes);
-
-app.use('/api', videoRoutes);
-
-// Make files in public/uploads available at /uploads/...
-app.use('/uploads', require('express').static(path.join(__dirname, 'public', 'uploads')));
-
-
-// CORS configuration to allow all origins, adjust based on your environment
-app.use(cors({
-  origin: '*', // Or specify allowed domains like 'http://localhost:3000'
-  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
-}));
-
-app.use(express.static('frontend-admin'));
-
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => console.log('Connected to MongoDB'))
-.catch((err) => console.log('Error connecting to MongoDB:', err));
-
-// Import Models
-require('./models/matchDetails'); // Importing the matchDetails model
-
-// Import Routes
+const uploadRoutes = require('./routes/upload');
 const leagueRoutes = require('./routes/leagueRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const matchDetailsRoutes = require('./routes/matchDetails');
 const adminRoutes = require('./routes/adminRoutes');
 
-// Use Routes
+dotenv.config();
+
+const app = express();
+
+// ✅ CORS Middleware - only once, before routes
+app.use(cors({
+    origin: 'https://www.inmatch.com.ng', // frontend domain
+    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+    credentials: true
+}));
+
+// Body parsers
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Static folders
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // all uploaded files
+app.use(express.static('frontend-admin')); // admin frontend
+
+// Routes
+app.use('/admin', uploadRoutes);
+app.use('/api', videoRoutes);
 app.use('/api/leagues', leagueRoutes);
 app.use('/api/matches', matchRoutes);
-app.use('/api/match-details' , matchDetailsRoutes);
-app.use('/api/admins', adminRoutes); // Admin routes
+app.use('/api/match-details', matchDetailsRoutes);
+app.use('/api/admins', adminRoutes);
 
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.log('Error connecting to MongoDB:', err));
+
+// Import Models
+require('./models/matchDetails');
+
+// Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: {
-    origin: '*', // Allow all origins, adjust based on your setup
-    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
-  },
+    cors: {
+        origin: 'https://www.inmatch.com.ng', // frontend domain
+        methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
+    }
 });
 
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+    console.log('A user connected:', socket.id);
 
-  socket.on('joinMatch', (matchId) => {
-    console.log(`User joined match room: ${matchId}`);
-    socket.join(matchId); 
-  });
+    socket.on('joinMatch', (matchId) => {
+        console.log(`User joined match room: ${matchId}`);
+        socket.join(matchId);
+    });
 
-  socket.on('sendUpdate', (data) => {
-    console.log('Broadcasting update to match room:', data.matchId);
-    io.to(data.matchId).emit('matchUpdate', data);
-  });
+    socket.on('sendUpdate', (data) => {
+        console.log('Broadcasting update to match room:', data.matchId);
+        io.to(data.matchId).emit('matchUpdate', data);
+    });
 
-  socket.on('disconnect', () => {
-    console.log('A user disconnected:', socket.id);
-  });
+    socket.on('disconnect', () => {
+        console.log('A user disconnected:', socket.id);
+    });
 });
 
 app.set('io', io);
 
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server running on port ${PORT}`);
 });
