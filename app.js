@@ -32,7 +32,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Static folders
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // all uploaded files
+app.use('/uploads/videos', express.static(path.join(__dirname, 'uploads/videos')));
+ // all uploaded files
 app.use(express.static('frontend-admin')); // admin frontend
 
 // Routes
