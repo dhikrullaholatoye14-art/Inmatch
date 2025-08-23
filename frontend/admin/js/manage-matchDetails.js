@@ -157,7 +157,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             fouls: foulsInput.value
         };
 
-        // Collect goals
         const updatedGoalsTeam1 = Array.from(goalDetailsContainer.querySelectorAll('.goal-input.goal-team1'))
             .map(g => ({
                 player: g.querySelector('input[placeholder="Player Name"]').value.trim(),
@@ -170,7 +169,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 time: g.querySelector('input[placeholder="Goal Time"]').value.trim()
             })).filter(g => g.player && g.time);
 
-        // Collect videos (handle file uploads or URLs)
         const updatedVideos = [];
         const videoInputs = Array.from(videoDetailsContainer.querySelectorAll('.video-input'));
         for (let vi of videoInputs) {
@@ -179,7 +177,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
 
-            // If a file is selected, upload to backend
             if (fileInput && fileInput.files.length) {
                 const formData = new FormData();
                 formData.append("video", fileInput.files[0]);
@@ -223,7 +220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         goalDetailsContainer.appendChild(div);
     }
 
-    // Add video input
+    // Add video input (with permanent delete)
     function addVideoInput(title = '', url = '') {
         const div = document.createElement('div');
         div.className = "video-input";
@@ -232,8 +229,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             <input type="text" placeholder="Video URL" value="${url}">
             <input type="file" accept="video/*">
             <button type="button" class="removeVideo">❌</button>
+            <button type="button" class="deleteVideoFromDB">🗑️ Delete from server</button>
         `;
+
         div.querySelector('.removeVideo').addEventListener('click', () => div.remove());
+
+        div.querySelector('.deleteVideoFromDB').addEventListener('click', async () => {
+            if (!confirm('Are you sure you want to permanently delete this video?')) return;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/delete-video`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoUrl: url, matchId })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Video deleted permanently!');
+                    div.remove();
+                    await fetchMatchDetails(); // refresh list from backend
+                } else {
+                    alert('Delete failed: ' + data.error);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error deleting video');
+            }
+        });
+
         videoDetailsContainer.appendChild(div);
     }
 

@@ -33,4 +33,27 @@ router.post('/upload-video', upload.single('video'), (req, res) => {
   }
 });
 
+router.post('/delete-video', async (req, res) => {
+    try {
+        const { videoUrl, matchId } = req.body;
+        if (!videoUrl || !matchId) return res.status(400).json({ error: 'Missing data' });
+
+        const filePath = path.join(__dirname, '../', videoUrl);
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+        // Remove from match-details DB
+        const MatchDetails = require('../models/matchDetails');
+        await MatchDetails.updateOne(
+            { matchId },
+            { $pull: { videos: { videoUrl } } }
+        );
+
+        res.json({ message: 'Video deleted successfully' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to delete video' });
+    }
+});
+
+
 module.exports = router;
