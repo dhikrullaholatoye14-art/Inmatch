@@ -8,19 +8,19 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const cors = require('cors');
 
+// Load env vars first
+dotenv.config();
+
+const app = express();
+
 // Routes
-const videoRoutes = require('./routes/video');
-const uploadRoutes = require('./routes/upload');
+const videoRoutes = require('./routes/videoRoutes'); 
 const leagueRoutes = require('./routes/leagueRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const matchDetailsRoutes = require('./routes/matchDetails');
 const adminRoutes = require('./routes/adminRoutes');
 
-dotenv.config();
-
-const app = express();
-
-// ✅ CORS Middleware - only once, before routes
+// ✅ CORS Middleware
 app.use(cors({
     origin: 'https://www.inmatch.com.ng', // frontend domain
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
@@ -31,20 +31,17 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static folders
-app.use('/uploads/videos', express.static(path.join(__dirname, 'uploads/videos')));
- // all uploaded files
-app.use(express.static('frontend-admin')); // admin frontend
+// ✅ Serving admin frontend (keep if needed)
+app.use(express.static('frontend-admin'));
 
-// Routes
-app.use('/admin', uploadRoutes);
-app.use('/api', videoRoutes);
+// ✅ Routes
+app.use('/api/videos', videoRoutes);
 app.use('/api/leagues', leagueRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/match-details', matchDetailsRoutes);
 app.use('/api/admins', adminRoutes);
 
-// MongoDB Connection
+// ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -55,11 +52,11 @@ mongoose.connect(process.env.MONGO_URI, {
 // Import Models
 require('./models/matchDetails');
 
-// Socket.io
+// ✅ Socket.io
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: 'https://www.inmatch.com.ng', // frontend domain
+        origin: 'https://www.inmatch.com.ng',
         methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
     }
 });

@@ -3,6 +3,16 @@ document.addEventListener("DOMContentLoaded", async () => {
     const videoList = document.getElementById("videoList");
     const statsContainer = document.getElementById("stats-container");
 
+    const API_BASE = "https://inmatch-backend-0csv.onrender.com";
+
+    function normalizeVideoPath(value) {
+        if (!value) return value;
+        const trimmed = value.trim();
+        if (/^https?:\/\//i.test(trimmed)) return trimmed; // external full URL
+        if (trimmed.startsWith("/uploads/")) return API_BASE + trimmed; // backend upload relative path
+        return `${API_BASE}/uploads/videos/${trimmed}`; // fallback
+    }
+
     function isMP4(url) {
         return /\.(mp4|webm|ogg)(\?|#|$)/i.test(url);
     }
@@ -29,7 +39,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("❌ matchId missing.");
         return;
     }
-    const API_BASE = "https://inmatch-backend-0csv.onrender.com";
+
     const API_MATCH_URL = `${API_BASE}/api/matches/${matchId}`;
     const API_MATCH_DETAILS_URL = `${API_BASE}/api/match-details/${matchId}`;
 
@@ -79,26 +89,27 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Build video list
         videoList.innerHTML = details.videos.map(video => {
+            const src = normalizeVideoPath(video.videoUrl);
             let content = '';
 
-            if (isMP4(video.videoUrl)) {
+            if (isMP4(src)) {
                 content = `
                     <video controls style="width:100%; height:auto;" onended="returnToIcon(this)">
-                        <source src="${video.videoUrl}" type="video/mp4">
+                        <source src="${src}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                 `;
             }
-            else if (isYouTube(video.videoUrl)) {
-                const ytId = video.videoUrl.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)[1];
+            else if (isYouTube(src)) {
+                const ytId = src.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/)[1];
                 content = `
                     <iframe width="100%" height="315" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen></iframe>
                 `;
             }
-            else if (isTwitter(video.videoUrl)) {
+            else if (isTwitter(src)) {
                 content = `
                     <blockquote class="twitter-tweet">
-                        <a href="${video.videoUrl}"></a>
+                        <a href="${src}"></a>
                     </blockquote>
                 `;
                 setTimeout(() => {
@@ -112,13 +123,13 @@ document.addEventListener("DOMContentLoaded", async () => {
                     }
                 }, 100);
             }
-            else if (isImage(video.videoUrl)) {
-                content = `<img src="${video.videoUrl}" alt="${video.title}" style="max-width:100%; height:auto;">`;
+            else if (isImage(src)) {
+                content = `<img src="${src}" alt="${video.title}" style="max-width:100%; height:auto;">`;
             }
             else {
                 content = `
                     <video controls style="width:100%; height:auto;" onended="returnToIcon(this)">
-                        <source src="${video.videoUrl}" type="video/mp4">
+                        <source src="${src}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                 `;

@@ -1,27 +1,29 @@
-// middleware/upload.js
-const multer = require('multer');
-const path = require('path');
+const multer = require("multer");
+const path = require("path");
 
-// Where uploaded videos will be stored
+// Store files temporarily before uploading to Cloudinary
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/videos'); // Ensure this folder exists
-  },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
-  }
+    cb(null, Date.now() + path.extname(file.originalname)); // unique file name
+  },
 });
 
-// Filter to only accept video files
-function fileFilter(req, file, cb) {
-  const allowed = /mp4|webm|ogg/;
-  const ext = path.extname(file.originalname).toLowerCase();
-  if (allowed.test(ext)) cb(null, true);
-  else cb(new Error('Only video files are allowed'));
-}
+// Accept only video files
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /mp4|avi|mkv|mov/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
 
-const upload = multer({ storage, fileFilter });
+  if (extname) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only video files are allowed!"), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max
+});
 
 module.exports = upload;
