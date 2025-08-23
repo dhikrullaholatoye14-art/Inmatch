@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const API_BASE = "https://inmatch-backend-0csv.onrender.com";
 
-    // ---- Attach button listeners FIRST so they work even if matchId is missing initially
+    // Attach button listeners
     addGoalTeam1Btn.addEventListener('click', () => addGoalInput('team1'));
     addGoalTeam2Btn.addEventListener('click', () => addGoalInput('team2'));
     addVideoBtn.addEventListener('click', () => addVideoInput());
@@ -28,21 +28,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'admin-login.html';
     });
 
-    // ✅ Normalize local video paths (allow URL, already-correct /uploads path, or bare filename -> /uploads/videos/filename)
+    // Normalize video URLs to backend-relative path
     function normalizeVideoPath(value) {
         if (!value) return value;
         const trimmed = value.trim();
-        if (/^https?:\/\//i.test(trimmed)) return trimmed;   // Full URL
-        if (trimmed.startsWith('/uploads/')) return trimmed; // Our static mount
-        return `/uploads/videos/${trimmed}`;                 // Treat bare filename as uploaded video
+        if (/^https?:\/\//i.test(trimmed)) return trimmed; // Full URL
+        if (trimmed.startsWith('/uploads/')) return API_BASE + trimmed; // Backend relative
+        return `${API_BASE}/uploads/videos/${trimmed}`; // Bare filename
     }
 
-    // ✅ Helper to decide if we can inline-play with <video>
     function isDirectVideoFile(src) {
         return /\.(mp4|webm|ogg)(\?.*)?$/i.test(src);
     }
 
-    // ---- Resolve matchId with robust fallbacks
+    // Resolve matchId robustly
     let matchId = new URLSearchParams(window.location.search).get('matchId')
         || localStorage.getItem('currentMatchId')
         || sessionStorage.getItem('currentMatchId');
@@ -51,14 +50,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const entered = window.prompt('No match ID provided. Enter a Match ID to load details:');
         if (entered && entered.trim()) {
             matchId = entered.trim();
-            // persist and reflect in URL for future reloads
             localStorage.setItem('currentMatchId', matchId);
             sessionStorage.setItem('currentMatchId', matchId);
             const url = new URL(window.location.href);
             url.searchParams.set('matchId', matchId);
             history.replaceState(null, '', url);
         } else {
-            console.warn('⚠️ No match ID provided. You can still add/edit fields, but fetching/saving requires a valid Match ID.');
+            console.warn('⚠️ No match ID provided.');
         }
     }
 
@@ -127,13 +125,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            // ✅ Videos
+            // Videos
             const videos = details.videos || [];
             if (videos.length) {
                 matchStatsContainer.innerHTML += `<h3>Match Videos</h3><div id="videos-render"></div>`;
                 const videosRender = document.getElementById('videos-render');
                 videos.forEach(video => {
-                    const src = video.videoUrl || '';
+                    const src = normalizeVideoPath(video.videoUrl);
                     if (isDirectVideoFile(src)) {
                         videosRender.innerHTML += `
                             <div>
@@ -168,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
 
         if (!API_MATCH_DETAILS_URL) {
-            alert('Please provide a valid Match ID (via URL ?matchId=... or the prompt) before saving.');
+            alert('Please provide a valid Match ID before saving.');
             return;
         }
 
@@ -179,7 +177,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             fouls: foulsInput.value
         };
 
-        // ✅ Normalize video URLs/paths before sending
         const updatedVideos = Array.from(videoDetailsContainer.querySelectorAll('.video-input'))
             .map(video => {
                 const title = video.querySelector('input[placeholder="Video Title"]').value.trim();
@@ -251,7 +248,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         videoDetailsContainer.appendChild(videoInput);
     }
 
-    // Only fetch if we actually have a matchId now
+    // Fetch only if matchId exists
     if (matchId) {
         await fetchMatchOverview();
         await fetchMatchDetails();
