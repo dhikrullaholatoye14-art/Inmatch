@@ -9,6 +9,8 @@ const path = require('path');
 
 
 const cors = require('cors');
+const videoRoutes = require('./routes/video');
+
 
 dotenv.config();
 
@@ -16,10 +18,11 @@ const app = express();
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-
+app.use('/uploads/videos', express.static(path.join(__dirname, 'uploads/videos')));
 const uploadRoutes = require('./routes/upload'); 
 app.use('/admin', uploadRoutes);
 
+app.use('/api', videoRoutes);
 
 // Make files in public/uploads available at /uploads/...
 app.use('/uploads', require('express').static(path.join(__dirname, 'public', 'uploads')));
