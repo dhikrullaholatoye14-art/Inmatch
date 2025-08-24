@@ -25,7 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'admin-login.html';
     });
 
-    // --- Match ID handling ---
     let matchId = new URLSearchParams(window.location.search).get('matchId')
         || localStorage.getItem('currentMatchId')
         || sessionStorage.getItem('currentMatchId');
@@ -52,7 +51,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return /\.(mp4|webm|ogg)(\?.*)?$/i.test(src);
     }
 
-    // --- Fetch overview (keep untouched) ---
     async function fetchMatchOverview() {
         if (!API_MATCH_URL) return;
         try {
@@ -72,7 +70,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) { console.error(err); }
     }
 
-    // --- Fetch match details (keep mostly intact) ---
     async function fetchMatchDetails() {
         if (!API_MATCH_DETAILS_URL) return;
         try {
@@ -126,7 +123,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) { console.error(err); }
     }
 
-    // --- Submit handler (video upload logic added safely) ---
     matchDetailsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!API_MATCH_DETAILS_URL) { alert("Provide valid Match ID"); return; }
@@ -156,11 +152,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
             let videoId = vi.dataset.videoId || '';
-            let isURL = true;
+            let isURL = true;  // assume URL unless file is uploaded
 
+            // Upload file if present
             if (fileInput && fileInput.files.length) {
-                isURL = false;
                 const file = fileInput.files[0];
+                const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+                if (!allowedTypes.includes(file.type)) { alert('Invalid video type. Use MP4, WEBM, or OGG.'); continue; }
+                isURL = false;
+
                 const formData = new FormData();
                 formData.append("video", file);
                 formData.append("title", title);
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         vi.dataset.videoId = videoId;
                         urlInput.value = videoUrl;
                     }
-                } catch (err) { console.error("Video upload failed:", err); alert("Video upload failed."); continue; }
+                } catch (err) { console.error("Video upload failed:", err); alert("Video upload failed. Check console."); continue; }
                 finally { isUploading = false; }
             }
 
@@ -209,6 +209,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
+            console.log('Submitting payload:', payload);
             const res = await fetch(API_MATCH_DETAILS_URL, {
                 method: matchDetailsExist ? "PATCH" : "POST",
                 headers: { "Content-Type": "application/json" },
@@ -223,21 +224,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // --- Goal/video input helpers ---
+    // --- Add goal input ---
     function addGoalInput(team, player = '', time = '') {
         const div = document.createElement('div');
         div.className = `goal-input goal-${team}`;
-        div.innerHTML = `<input type="text" placeholder="Player Name" value="${player}"><input type="text" placeholder="Goal Time" value="${time}"><button type="button" class="removeGoal">❌</button>`;
+        div.innerHTML = 
+            `<input type="text" placeholder="Player Name" value="${player}">
+             <input type="text" placeholder="Goal Time" value="${time}">
+             <button type="button" class="removeGoal">❌</button>`;
         div.querySelector('.removeGoal').addEventListener('click', () => div.remove());
         goalDetailsContainer.appendChild(div);
     }
 
+    // --- Add video input ---
     function addVideoInput(title = '', url = '', videoId = '', isURL = true) {
         const div = document.createElement('div');
         div.className = "video-input";
         div.dataset.videoId = videoId;
         div.dataset.isURL = isURL;
-        div.innerHTML = `<input type="text" placeholder="Video Title" value="${title}"><input type="text" placeholder="Video URL" value="${url}"><input type="file" name="video" accept="video/mp4,video/webm,video/ogg"><button type="button" class="removeVideo">❌</button><button type="button" class="deleteVideoFromDB">🗑️ Delete from server</button>`;
+        div.innerHTML = 
+            `<input type="text" placeholder="Video Title" value="${title}">
+             <input type="text" placeholder="Video URL" value="${url}">
+             <input type="file" name="video" accept="video/mp4,video/webm,video/ogg">
+             <button type="button" class="removeVideo">❌</button>
+             <button type="button" class="deleteVideoFromDB">🗑️ Delete from server</button>`;
 
         div.querySelector('.removeVideo').addEventListener('click', () => div.remove());
 
@@ -266,7 +276,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Initial fetch ---
     if (matchId) {
-        await fetchMatchOverview(); // ensure overview always runs first
+        await fetchMatchOverview();
         await fetchMatchDetails();
     }
 });
+       
