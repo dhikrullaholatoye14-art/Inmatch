@@ -152,13 +152,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
             let videoId = vi.dataset.videoId || '';
-            let isURL = true;  // assume URL unless file is uploaded
+            let isURL = true;
 
-            // Upload file if present
             if (fileInput && fileInput.files.length) {
                 const file = fileInput.files[0];
                 const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
-                if (!allowedTypes.includes(file.type)) { alert('Invalid video type. Use MP4, WEBM, or OGG.'); continue; }
+                if (!allowedTypes.includes(file.type)) { alert('Invalid video type.'); continue; }
                 isURL = false;
 
                 const formData = new FormData();
@@ -197,6 +196,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 } catch (err) { console.error("Video upload failed:", err); alert("Video upload failed. Check console."); continue; }
                 finally { isUploading = false; }
+            } else if (videoUrl && !fileInput?.files.length) {
+                isURL = true; // Only URL, no file
             }
 
             if (title && videoUrl) updatedVideos.push({ title, videoUrl, ...(videoId && {_id: videoId}), isURL });
@@ -280,4 +281,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetchMatchDetails();
     }
 });
-       
+
