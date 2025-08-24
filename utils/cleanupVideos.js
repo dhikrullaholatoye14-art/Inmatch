@@ -10,7 +10,8 @@ cron.schedule('0 * * * *', async () => {
 
   for (let vid of oldVideos) {
     try {
-      const filePath = path.join(__dirname, '../src', vid.videoUrl); // src/uploads/...
+const filePath = path.join(__dirname, '../', vid.videoUrl); // remove extra src
+
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
       await vid.remove();
       console.log('Deleted old video:', vid.videoUrl);
