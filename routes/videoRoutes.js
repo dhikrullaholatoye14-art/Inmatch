@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const Video = require('../models/video'); // lowercase 'video'
+const Video = require('../models/video');
 
-// --- Multer setup ---
+// --- Multer storage ---
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../src/uploads')); // save in /uploads
+    // save inside src/uploads
+    cb(null, path.join(__dirname, '../src/uploads'));
   },
   filename: function (req, file, cb) {
     const uniqueName = Date.now() + '-' + file.originalname;
@@ -15,9 +16,8 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-// --- Upload video route ---
 router.post('/upload', upload.single('video'), async (req, res) => {
   try {
     const { title, matchId } = req.body;
@@ -26,7 +26,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
     const newVideo = new Video({
       title,
       matchId,
-      videoUrl: 'uploads/' + req.file.filename, // relative path for express.static
+      videoUrl: 'uploads/' + req.file.filename, // relative to /uploads
       isURL: false
     });
 
