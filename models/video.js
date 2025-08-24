@@ -1,13 +1,9 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const videoSchema = new mongoose.Schema({
-  title: { type: String, required: true, trim: true },
-  description: { type: String, trim: true },
-  matchId: { type: mongoose.Schema.Types.ObjectId, ref: "Match" },
-  videoUrl: { type: String, required: true },   // Cloudinary URL
-  publicId: { type: String, required: true },   // Cloudinary public_id
-  mimeType: { type: String },
-  createdAt: { type: Date, default: Date.now },
-});
+    title: { type: String, required: true },
+    videoUrl: { type: String, required: true }, // path to local file or URL
+    isURL: { type: Boolean, default: true },   // true if URL, false if uploaded
+}, { timestamps: true }); // timestamps automatically adds createdAt and updatedAt
 
-module.exports = mongoose.model("Video", videoSchema);
+module.exports = mongoose.model('video', videoSchema); // lowercase 'video' as per your request

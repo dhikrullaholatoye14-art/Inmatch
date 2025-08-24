@@ -100,9 +100,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const videosRender = document.getElementById('videos-render');
                 videos.forEach(video => {
                     const src = video.videoUrl;
-                    videosRender.innerHTML += isDirectVideoFile(src)
-                        ? `<div><strong>${video.title}</strong><br><video src="${src}" width="320" controls></video></div>`
-                        : `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
+                    if (!video.isURL) {
+                        videosRender.innerHTML += `<div><strong>${video.title}</strong><br>
+                            <video src="${src}" width="320" controls></video></div>`;
+                    } else {
+                        videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
+                    }
                 });
             }
 
@@ -152,13 +155,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
             let videoId = vi.dataset.videoId || '';
-            let isURL = true;  // assume URL unless file is uploaded
+            let isURL = true;
 
-            // Upload file if present
             if (fileInput && fileInput.files.length) {
                 const file = fileInput.files[0];
                 const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
-                if (!allowedTypes.includes(file.type)) { alert('Invalid video type. Use MP4, WEBM, or OGG.'); continue; }
+                if (!allowedTypes.includes(file.type)) { alert('Invalid video type.'); continue; }
                 isURL = false;
 
                 const formData = new FormData();
@@ -195,7 +197,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         vi.dataset.videoId = videoId;
                         urlInput.value = videoUrl;
                     }
-                } catch (err) { console.error("Video upload failed:", err); alert("Video upload failed. Check console."); continue; }
+                } catch 
+(err) { console.error("Video upload failed:", err); alert("Video upload failed. Check console."); continue; }
                 finally { isUploading = false; }
             }
 
@@ -280,4 +283,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetchMatchDetails();
     }
 });
-       

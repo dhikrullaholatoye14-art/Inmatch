@@ -1,14 +1,12 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const http = require('http');
 const { Server } = require('socket.io');
-const bcrypt = require('bcryptjs');
 const path = require('path');
 const cors = require('cors');
 
-// Load env vars first
+// Load environment variables
 dotenv.config();
 
 const app = express();
@@ -20,7 +18,10 @@ const matchRoutes = require('./routes/matchRoutes');
 const matchDetailsRoutes = require('./routes/matchDetails');
 const adminRoutes = require('./routes/adminRoutes');
 
-// ✅ CORS Middleware (production + localhost for dev)
+// ✅ Start cron job for cleaning old videos
+require('./utils/cleanupVideos');
+
+// ✅ CORS Middleware
 app.use(cors({
   origin: process.env.NODE_ENV === 'production'
     ? 'https://www.inmatch.com.ng'
@@ -33,8 +34,11 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// ✅ Serving admin frontend (keep if needed)
+// ✅ Serve admin frontend
 app.use(express.static('frontend-admin'));
+
+// ✅ Serve uploaded videos folder
+app.use('/uploads', express.static('uploads'));
 
 // ✅ API Routes
 app.use('/api/videos', videoRoutes);
@@ -43,7 +47,7 @@ app.use('/api/matches', matchRoutes);
 app.use('/api/match-details', matchDetailsRoutes);
 app.use('/api/admins', adminRoutes);
 
-// ✅ Global JSON error handler (must be after routes)
+// ✅ Global JSON error handler
 app.use((err, req, res, next) => {
   console.error(err);
   const status = err.status || 500;
@@ -65,7 +69,8 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.log('❌ Error connecting to MongoDB:', err));
 
 // Import Models
-require('../models/matchDetails');
+require('./models/matchDetails'); // keep lowercase for consistency
+require('./models/video'); // ensure video model is loaded
 
 // ✅ Socket.io setup
 const server = http.createServer(app);
@@ -98,14 +103,9 @@ io.on('connection', (socket) => {
 
 app.set('io', io);
 
-// ✅ Extra safety logging
-process.on('unhandledRejection', (reason) => {
-  console.error('Unhandled Rejection:', reason);
-});
-
-process.on('uncaughtException', (err) => {
-  console.error('Uncaught Exception:', err);
-});
+// ✅ Safety logging
+process.on('unhandledRejection', (reason) => console.error('Unhandled Rejection:', reason));
+process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
 
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
