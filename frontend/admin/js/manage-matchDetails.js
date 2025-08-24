@@ -101,7 +101,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 videos.forEach(video => {
                     const src = video.videoUrl;
                     if (!video.isURL) {
-                        // Local uploaded video file
                         videosRender.innerHTML += `<div><strong>${video.title}</strong><br>
                             <video width="320" controls>
                                 <source src="${API_BASE}/${src}" type="video/mp4">
@@ -109,14 +108,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </video></div>`;
                     } else {
                         if (isDirectVideoFile(src)) {
-                            // Direct external video link
                             videosRender.innerHTML += `<div><strong>${video.title}</strong><br>
                                 <video width="320" controls>
                                     <source src="${src}" type="video/mp4">
                                     Your browser does not support the video tag.
                                 </video></div>`;
                         } else {
-                            // URL (YouTube, etc.)
                             videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
                         }
                     }
@@ -261,28 +258,13 @@ document.addEventListener('DOMContentLoaded', async () => {
              <input type="text" placeholder="Video URL" value="${url}">
              <input type="file" name="video" accept="video/mp4,video/webm,video/ogg">
              <button type="button" class="removeVideo">❌</button>
-             <button type="button" class="deleteVideoFromDB">🗑️ Delete from server</button>`;
+             <button type="button" class="deleteVideoFromDB">🗑️ Delete from interface</button>`;
 
         div.querySelector('.removeVideo').addEventListener('click', () => div.remove());
 
-        div.querySelector('.deleteVideoFromDB').addEventListener('click', async () => {
-            if (!videoId) return alert('No video ID to delete (URL video only exists in form)');
-            if (!confirm('Are you sure you want to permanently delete this video?')) return;
-
-            try {
-                const res = await fetch(`${API_BASE}/api/videos/${videoId}`, { method: 'DELETE' });
-                const data = await res.json();
-                if (res.ok) {
-                    alert('Video deleted permanently!');
-                    div.remove();
-                    await fetchMatchDetails();
-                } else {
-                    alert('Delete failed: ' + data.message);
-                }
-            } catch (err) {
-                console.error(err);
-                alert('Error deleting video');
-            }
+        // **Updated Delete Button to just remove from frontend**
+        div.querySelector('.deleteVideoFromDB').addEventListener('click', () => {
+            if (confirm('Remove this video from the interface?')) div.remove();
         });
 
         videoDetailsContainer.appendChild(div);
