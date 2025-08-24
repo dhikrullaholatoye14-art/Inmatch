@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const API_MATCH_DETAILS_URL = matchId ? `${API_BASE}/api/match-details/${matchId}` : null;
 
     let matchDetailsExist = false;
+    let isUploading = false; // flag to prevent submission during uploads
 
     function isDirectVideoFile(src) {
         return /\.(mp4|webm|ogg)(\?.*)?$/i.test(src);
@@ -132,6 +133,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     matchDetailsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!API_MATCH_DETAILS_URL) { alert("Provide valid Match ID"); return; }
+        if (isUploading) { alert("Video uploads in progress, please wait."); return; }
 
         const updatedStats = {
             possession: ballPossessionInput.value,
@@ -150,13 +152,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const updatedVideos = [];
         const videoInputs = Array.from(videoDetailsContainer.querySelectorAll('.video-input'));
+        
         for (let vi of videoInputs) {
             const title = vi.querySelector('input[placeholder="Video Title"]').value.trim();
             const urlInput = vi.querySelector('input[placeholder="Video URL"]');
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
+            let videoId = vi.dataset.videoId || '';
 
-            // Upload new file if selected
             if (fileInput && fileInput.files.length) {
                 const file = fileInput.files[0];
                 const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
@@ -164,19 +167,56 @@ document.addEventListener('DOMContentLoaded', async () => {
                     alert('Invalid video type. Use MP4, WEBM, or OGG.');
                     continue;
                 }
+
                 const formData = new FormData();
-                formData.append("video", file); // name matches multer
+                formData.append("video", file);
+                formData.append("title", title);
                 formData.append("matchId", matchId);
+
                 try {
-                    const res = await fetch(`${API_BASE}/api/videos/upload`, { method: "POST", body: formData });
-                    const data = await res.json();
+                    isUploading = true;
+
+                    // progress bar
+                    const progressBar = document.createElement('progress');
+                    progressBar.max = 100;
+                    progressBar.value = 0;
+                    vi.appendChild(progressBar);
+
+                    const xhr = new XMLHttpRequest();
+                    xhr.open('POST', `${API_BASE}/api/videos/upload`, true);
+
+                    xhr.upload.onprogress = (e) => {
+                        if (e.lengthComputable) {
+                            progressBar.value = (e.loaded / e.total) * 100;
+                        }
+                    };
+
+                    const uploadPromise = new Promise((resolve, reject) => {
+                        xhr.onload = () => {
+                            vi.removeChild(progressBar);
+                            if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
+                            else reject(xhr.responseText);
+                        };
+                        xhr.onerror = () => reject(xhr.responseText);
+                    });
+
+                    xhr.send(formData);
+                    const data = await uploadPromise;
+
                     if (data.video && data.video.videoUrl) {
                         videoUrl = data.video.videoUrl;
+                        videoId = data.video._id;
                     }
-                } catch (err) { console.error("Video upload failed:", err); }
+                } catch (err) {
+                    console.error("Video upload failed:", err);
+                    alert("Video upload failed. Check console for details.");
+                    continue;
+                } finally {
+                    isUploading = false;
+                }
             }
 
-            if (title && videoUrl) updatedVideos.push({ title, videoUrl }); // sanitized
+            if (title && videoUrl) updatedVideos.push({ title, videoUrl, _id: videoId });
         }
 
         const payload = {
@@ -250,4 +290,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetchMatchDetails();
     }
 });
-

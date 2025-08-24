@@ -1,11 +1,7 @@
 const multer = require('multer');
-const os = require('os');
-const path = require('path');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, os.tmpdir()),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
-});
+// Memory storage to avoid file system issues
+const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype && file.mimetype.startsWith('video/')) return cb(null, true);
