@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const upload = require('../middleware/upload');
 const Video = require('../models/Video');
-const MatchDetails = require('../models/MatchDetails'); // import model
-const cloudinary = require('../config/cloudinary'); // configured Cloudinary instance
+const MatchDetails = require('../models/MatchDetails');
+const cloudinary = require('../config/cloudinary');
 
 // ------------------- Upload Video File -------------------
 router.post('/upload', upload.single('video'), async (req, res) => {
@@ -12,8 +12,7 @@ router.post('/upload', upload.single('video'), async (req, res) => {
 
         const filename = `video-${Date.now()}`;
 
-        // Upload buffer to Cloudinary
-        const streamUpload = (fileBuffer) => {
+        const uploadToCloudinary = (buffer) => {
             return new Promise((resolve, reject) => {
                 const stream = cloudinary.uploader.upload_stream(
                     { resource_type: 'video', public_id: filename },
@@ -22,13 +21,12 @@ router.post('/upload', upload.single('video'), async (req, res) => {
                         else resolve(result);
                     }
                 );
-                stream.end(fileBuffer);
+                stream.end(buffer);
             });
         };
 
-        const result = await streamUpload(req.file.buffer);
+        const result = await uploadToCloudinary(req.file.buffer);
 
-        // Save video in DB
         const video = await Video.create({
             title: req.body.title || req.file.originalname,
             description: req.body.description || '',
@@ -51,12 +49,10 @@ router.patch('/:id', async (req, res) => {
     try {
         const { stats, goalsDetails, videos } = req.body;
 
-        // Ensure all videos have _id (for URL videos or unsaved ones)
+        // Save all videos to Video collection if they lack _id
         const savedVideos = [];
         for (let v of videos) {
-            if (v._id) {
-                savedVideos.push(v);
-            } else {
+            if (!v._id) {
                 const newVideo = await Video.create({
                     title: v.title,
                     videoUrl: v.videoUrl,
@@ -67,10 +63,11 @@ router.patch('/:id', async (req, res) => {
                     title: newVideo.title,
                     videoUrl: newVideo.videoUrl
                 });
+            } else {
+                savedVideos.push(v);
             }
         }
 
-        // Update or create match details
         const details = await MatchDetails.findOneAndUpdate(
             { matchId: req.params.id },
             { stats, goalsDetails, videos: savedVideos },
@@ -78,7 +75,6 @@ router.patch('/:id', async (req, res) => {
         );
 
         res.status(200).json({ details });
-
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Failed to update match details', error: err.message });
@@ -91,7 +87,6 @@ router.delete('/:id', async (req, res) => {
         const video = await Video.findById(req.params.id);
         if (!video) return res.status(404).json({ message: 'Video not found' });
 
-        // Delete from Cloudinary if it has a publicId
         if (video.publicId) {
             await cloudinary.uploader.destroy(video.publicId, { resource_type: 'video' });
         }
