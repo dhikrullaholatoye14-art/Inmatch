@@ -38,7 +38,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static('frontend-admin'));
 
 // ✅ Serve uploaded videos folder
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 
 // ✅ API Routes
 app.use('/api/videos', videoRoutes);

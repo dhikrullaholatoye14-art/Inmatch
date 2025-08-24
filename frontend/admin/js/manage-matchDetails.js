@@ -108,8 +108,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 Your browser does not support the video tag.
                             </video></div>`;
                     } else {
-                        // External URL (YouTube, etc.)
-                        videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
+                        if (isDirectVideoFile(src)) {
+                            // Direct external video link
+                            videosRender.innerHTML += `<div><strong>${video.title}</strong><br>
+                                <video width="320" controls>
+                                    <source src="${src}" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video></div>`;
+                        } else {
+                            // URL (YouTube, etc.)
+                            videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
+                        }
                     }
                 });
             }
