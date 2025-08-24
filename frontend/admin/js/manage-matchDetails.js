@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const API_MATCH_DETAILS_URL = matchId ? `${API_BASE}/api/match-details/${matchId}` : null;
 
     let matchDetailsExist = false;
-    let isUploading = false; // flag to prevent submission during uploads
+    let isUploading = false;
 
     function isDirectVideoFile(src) {
         return /\.(mp4|webm|ogg)(\?.*)?$/i.test(src);
@@ -82,7 +82,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const { details } = await res.json();
             matchDetailsExist = true;
 
-            // Stats
             matchStatsContainer.innerHTML = 
                 `<h3>Match Statistics</h3>
                 <p><strong>Ball Possession:</strong> ${details.stats?.possession || "0 - 0"}</p>
@@ -90,7 +89,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p><strong>Corners:</strong> ${details.stats?.corners || "0 - 0"}</p>
                 <p><strong>Fouls:</strong> ${details.stats?.fouls || "0 - 0"}</p>`;
 
-            // Goals
             const goalsTeam1 = details.goalsDetails?.team1 || [];
             const goalsTeam2 = details.goalsDetails?.team2 || [];
             if (goalsTeam1.length || goalsTeam2.length) {
@@ -99,7 +97,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (goalsTeam2.length) matchStatsContainer.innerHTML += `<p><strong>Team 2:</strong> ${goalsTeam2.map(g => `${g.player} (${g.time})`).join(', ')}</p>`;
             }
 
-            // Videos
             const videos = details.videos || [];
             if (videos.length) {
                 matchStatsContainer.innerHTML += `<h3>Match Videos</h3><div id="videos-render"></div>`;
@@ -112,7 +109,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             }
 
-            // Populate form inputs
             ballPossessionInput.value = details.stats?.possession || "";
             shotsOnTargetInput.value = details.stats?.shots || "";
             cornersInput.value = details.stats?.corners || "";
@@ -152,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const updatedVideos = [];
         const videoInputs = Array.from(videoDetailsContainer.querySelectorAll('.video-input'));
-        
+
         for (let vi of videoInputs) {
             const title = vi.querySelector('input[placeholder="Video Title"]').value.trim();
             const urlInput = vi.querySelector('input[placeholder="Video URL"]');
@@ -176,7 +172,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     isUploading = true;
 
-                    // progress bar
                     const progressBar = document.createElement('progress');
                     progressBar.max = 100;
                     progressBar.value = 0;
@@ -186,9 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     xhr.open('POST', `${API_BASE}/api/videos/upload`, true);
 
                     xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable) {
-                            progressBar.value = (e.loaded / e.total) * 100;
-                        }
+                        if (e.lengthComputable) progressBar.value = (e.loaded / e.total) * 100;
                     };
 
                     const uploadPromise = new Promise((resolve, reject) => {
@@ -206,6 +199,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (data.video && data.video.videoUrl) {
                         videoUrl = data.video.videoUrl;
                         videoId = data.video._id;
+                        vi.dataset.videoId = videoId; // Update dataset immediately
+                        urlInput.value = videoUrl;     // update input value
                     }
                 } catch (err) {
                     console.error("Video upload failed:", err);
@@ -216,7 +211,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }
 
-            if (title && videoUrl) updatedVideos.push({ title, videoUrl, _id: videoId });
+            // Only include videos with title and url
+            if (title && videoUrl) updatedVideos.push({ title, videoUrl, ...(videoId && {_id: videoId}) });
         }
 
         const payload = {
@@ -226,6 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
+            console.log('Submitting payload:', payload);
             const res = await fetch(API_MATCH_DETAILS_URL, {
                 method: matchDetailsExist ? "PATCH" : "POST",
                 headers: { "Content-Type": "application/json" },
@@ -285,8 +282,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         videoDetailsContainer.appendChild(div);
     }
 
+    // --- Initial fetch if matchId exists ---
     if (matchId) {
         await fetchMatchOverview();
         await fetchMatchDetails();
     }
 });
+
