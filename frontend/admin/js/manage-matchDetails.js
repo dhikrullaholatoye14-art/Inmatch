@@ -25,18 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'admin-login.html';
     });
 
-    function normalizeVideoPath(value) {
-        if (!value) return value;
-        const trimmed = value.trim();
-        if (/^https?:\/\//i.test(trimmed)) return trimmed;
-        if (trimmed.startsWith('/uploads/')) return API_BASE + trimmed;
-        return `${API_BASE}/uploads/videos/${trimmed}`;
-    }
-
-    function isDirectVideoFile(src) {
-        return /\.(mp4|webm|ogg)(\?.*)?$/i.test(src);
-    }
-
     let matchId = new URLSearchParams(window.location.search).get('matchId')
         || localStorage.getItem('currentMatchId')
         || sessionStorage.getItem('currentMatchId');
@@ -58,7 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let matchDetailsExist = false;
 
-    // Fetch match overview
+    function isDirectVideoFile(src) {
+        return /\.(mp4|webm|ogg)(\?.*)?$/i.test(src);
+    }
+
+    // --- Fetch match overview ---
     async function fetchMatchOverview() {
         if (!API_MATCH_URL) return;
         try {
@@ -80,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Fetch match details
+    // --- Fetch match details ---
     async function fetchMatchDetails() {
         if (!API_MATCH_DETAILS_URL) return;
         try {
@@ -112,16 +104,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 matchStatsContainer.innerHTML += `<h3>Match Videos</h3><div id="videos-render"></div>`;
                 const videosRender = document.getElementById('videos-render');
                 videos.forEach(video => {
-                    const src = normalizeVideoPath(video.videoUrl);
-                    if (isDirectVideoFile(src)) {
-                        videosRender.innerHTML += 
-                            `<div>
-                                <strong>${video.title || 'Video'}</strong><br>
-                                <video src="${src}" width="320" controls></video>
-                            </div>`;
-                    } else {
-                        videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
-                    }
+                    const src = video.videoUrl;
+                    videosRender.innerHTML += isDirectVideoFile(src)
+                        ? `<div><strong>${video.title}</strong><br><video src="${src}" width="320" controls></video></div>`
+                        : `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
                 });
             }
 
@@ -136,13 +122,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             goalsTeam2.forEach(g => addGoalInput('team2', g.player, g.time));
 
             videoDetailsContainer.innerHTML = '';
-            videos.forEach(v => addVideoInput(v.title, v.videoUrl));
+            videos.forEach(v => addVideoInput(v.title, v.videoUrl, v._id));
         } catch (err) {
             console.error(err);
         }
     }
 
-    // Form submit
+    // --- Form submit ---
     matchDetailsForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!API_MATCH_DETAILS_URL) { alert("Provide valid Match ID"); return; }
@@ -155,27 +141,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         const updatedGoalsTeam1 = Array.from(goalDetailsContainer.querySelectorAll('.goal-input.goal-team1'))
-            .map(g => ({
-                player: g.querySelector('input[placeholder="Player Name"]').value.trim(),
-                time: g.querySelector('input[placeholder="Goal Time"]').value.trim()
-            })).filter(g => g.player && g.time);
+            .map(g => ({ player: g.querySelector('input[placeholder="Player Name"]').value.trim(), time: g.querySelector('input[placeholder="Goal Time"]').value.trim() }))
+            .filter(g => g.player && g.time);
 
         const updatedGoalsTeam2 = Array.from(goalDetailsContainer.querySelectorAll('.goal-input.goal-team2'))
-            .map(g => ({
-                player: g.querySelector('input[placeholder="Player Name"]').value.trim(),
-                time: g.querySelector('input[placeholder="Goal Time"]').value.trim()
-            })).filter(g => g.player && g.time);
+            .map(g => ({ player: g.querySelector('input[placeholder="Player Name"]').value.trim(), time: g.querySelector('input[placeholder="Goal Time"]').value.trim() }))
+            .filter(g => g.player && g.time);
 
-        // Handle videos
-        const videoInputs = Array.from(videoDetailsContainer.querySelectorAll('.video-input'));
         const updatedVideos = [];
-
+        const videoInputs = Array.from(videoDetailsContainer.querySelectorAll('.video-input'));
         for (let vi of videoInputs) {
             const title = vi.querySelector('input[placeholder="Video Title"]').value.trim();
             const urlInput = vi.querySelector('input[placeholder="Video URL"]');
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
+            let videoId = vi.dataset.videoId || '';
 
+            // Upload new file if selected
             if (fileInput && fileInput.files.length) {
                 const file = fileInput.files[0];
                 const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
@@ -183,30 +165,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                     alert('Invalid video type. Use MP4, WEBM, or OGG.');
                     continue;
                 }
-
                 const formData = new FormData();
-                formData.append('video', file);
-                formData.append('matchId', matchId);
-
+                formData.append("video", file);
+                formData.append("matchId", matchId);
                 try {
-                    const res = await fetch(`${API_BASE}/api/videos/upload`, {
-                        method: 'POST',
-                        body: formData
-                    });
+                    const res = await fetch(`${API_BASE}/api/videos/upload`, { method: "POST", body: formData });
                     const data = await res.json();
-                    if (res.ok && data.video && data.video.videoUrl) {
+                    if (data.video && data.video.videoUrl) {
                         videoUrl = data.video.videoUrl;
-                    } else {
-                        alert('Video upload failed: ' + (data.message || 'Unknown error'));
-                        continue;
+                        videoId = data.video._id;
                     }
-                } catch (err) {
-                    console.error("Video upload failed:", err);
-                    continue;
-                }
+                } catch (err) { console.error("Video upload failed:", err); }
             }
 
-            if (title && videoUrl) updatedVideos.push({ title, videoUrl });
+            if (title && videoUrl) updatedVideos.push({ title, videoUrl, _id: videoId });
         }
 
         const payload = {
@@ -226,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (err) { console.error(err); }
     });
 
-    // Add goal input
+    // --- Add goal input ---
     function addGoalInput(team, player = '', time = '') {
         const div = document.createElement('div');
         div.className = `goal-input goal-${team}`;
@@ -238,34 +210,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         goalDetailsContainer.appendChild(div);
     }
 
-    // Add video input
-    function addVideoInput(title = '', url = '') {
+    // --- Add video input ---
+    function addVideoInput(title = '', url = '', videoId = '') {
         const div = document.createElement('div');
         div.className = "video-input";
-        div.innerHTML =
+        div.dataset.videoId = videoId;
+        div.innerHTML = 
             `<input type="text" placeholder="Video Title" value="${title}">
             <input type="text" placeholder="Video URL" value="${url}">
             <input type="file" accept="video/mp4,video/webm,video/ogg">
-            <button type="button" class="removeVideo">❌ Remove from form</button>
+            <button type="button" class="removeVideo">❌</button>
             <button type="button" class="deleteVideoFromDB">🗑️ Delete from server</button>`;
 
         div.querySelector('.removeVideo').addEventListener('click', () => div.remove());
 
         div.querySelector('.deleteVideoFromDB').addEventListener('click', async () => {
-            if (!url || !confirm('Are you sure you want to permanently delete this video?')) return;
+            if (!videoId) return alert('No video ID to delete');
+            if (!confirm('Are you sure you want to permanently delete this video?')) return;
+
             try {
-                const res = await fetch(`${API_BASE}/api/videos/delete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ videoUrl: url, matchId })
-                });
+                const res = await fetch(`${API_BASE}/api/videos/${videoId}`, { method: 'DELETE' });
                 const data = await res.json();
                 if (res.ok) {
                     alert('Video deleted permanently!');
                     div.remove();
                     await fetchMatchDetails();
                 } else {
-                    alert('Delete failed: ' + data.message || 'Unknown error');
+                    alert('Delete failed: ' + data.message);
                 }
             } catch (err) {
                 console.error(err);
