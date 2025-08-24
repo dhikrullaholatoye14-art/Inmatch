@@ -67,9 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <p>Status: ${match.status || 'N/A'}</p>
                     <p>Score: ${match.scoreTeam1 ?? '0'} - ${match.scoreTeam2 ?? '0'}</p>
                 </div>`;
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     }
 
     async function fetchMatchDetails() {
@@ -121,10 +119,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Videos
             videoDetailsContainer.innerHTML = '';
-            videos.forEach(v => addVideoInput(v.title, v.videoUrl, v._id));
-        } catch (err) {
-            console.error(err);
-        }
+            videos.forEach(v => addVideoInput(v.title, v.videoUrl, v._id, v.isURL));
+        } catch (err) { console.error(err); }
     }
 
     matchDetailsForm.addEventListener('submit', async (e) => {
@@ -156,15 +152,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
             let videoId = vi.dataset.videoId || '';
+            let isURL = true;  // assume URL unless file is uploaded
 
             // Upload file if present
             if (fileInput && fileInput.files.length) {
                 const file = fileInput.files[0];
                 const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
-                if (!allowedTypes.includes(file.type)) {
-                    alert('Invalid video type. Use MP4, WEBM, or OGG.');
-                    continue;
-                }
+                if (!allowedTypes.includes(file.type)) { alert('Invalid video type. Use MP4, WEBM, or OGG.'); continue; }
+                isURL = false;
 
                 const formData = new FormData();
                 formData.append("video", file);
@@ -180,9 +175,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                     const xhr = new XMLHttpRequest();
                     xhr.open('POST', `${API_BASE}/api/videos/upload`, true);
-                    xhr.upload.onprogress = (e) => {
-                        if (e.lengthComputable) progressBar.value = (e.loaded / e.total) * 100;
-                    };
+                    xhr.upload.onprogress = (e) => { if (e.lengthComputable) progressBar.value = (e.loaded / e.total) * 100; };
 
                     const uploadPromise = new Promise((resolve, reject) => {
                         xhr.onload = () => {
@@ -202,14 +195,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         vi.dataset.videoId = videoId;
                         urlInput.value = videoUrl;
                     }
-                } catch (err) {
-                    console.error("Video upload failed:", err);
-                    alert("Video upload failed. Check console for details.");
-                    continue;
-                } finally { isUploading = false; }
+                } catch (err) { console.error("Video upload failed:", err); alert("Video upload failed. Check console."); continue; }
+                finally { isUploading = false; }
             }
 
-            if (title && videoUrl) updatedVideos.push({ title, videoUrl, ...(videoId && {_id: videoId}) });
+            if (title && videoUrl) updatedVideos.push({ title, videoUrl, ...(videoId && {_id: videoId}), isURL });
         }
 
         const payload = {
@@ -217,6 +207,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             goalsDetails: { team1: updatedGoalsTeam1, team2: updatedGoalsTeam2 },
             videos: updatedVideos
         };
+
         try {
             console.log('Submitting payload:', payload);
             const res = await fetch(API_MATCH_DETAILS_URL, {
@@ -246,10 +237,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- Add video input ---
-    function addVideoInput(title = '', url = '', videoId = '') {
+    function addVideoInput(title = '', url = '', videoId = '', isURL = true) {
         const div = document.createElement('div');
         div.className = "video-input";
         div.dataset.videoId = videoId;
+        div.dataset.isURL = isURL;
         div.innerHTML = 
             `<input type="text" placeholder="Video Title" value="${title}">
              <input type="text" placeholder="Video URL" value="${url}">
@@ -288,5 +280,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetchMatchDetails();
     }
 });
-
        
