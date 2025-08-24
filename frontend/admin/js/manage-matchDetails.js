@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             goalsTeam2.forEach(g => addGoalInput('team2', g.player, g.time));
 
             videoDetailsContainer.innerHTML = '';
-            videos.forEach(v => addVideoInput(v.title, v.videoUrl));
+            videos.forEach(v => addVideoInput(v.title, v.videoUrl, v._id));
         } catch (err) {
             console.error(err);
         }
@@ -173,10 +173,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const urlInput = vi.querySelector('input[placeholder="Video URL"]');
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
+            let videoId = vi.dataset.videoId || ''; // store video ID if exists
 
             if (fileInput && fileInput.files.length) {
+                const file = fileInput.files[0];
+                const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Invalid video type. Use MP4, WEBM, or OGG.');
+                    continue;
+                }
+
                 const formData = new FormData();
-                formData.append("video", fileInput.files[0]); // ✅ changed from "videoFile" to "video"
+                formData.append("video", file);
                 formData.append("matchId", matchId);
 
                 try {
@@ -185,13 +193,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                         body: formData 
                     });
                     const data = await res.json();
-                    if (data.video && data.video.videoUrl) videoUrl = data.video.videoUrl; // ✅ changed from data.url
+                    if (data.video && data.video.videoUrl) {
+                        videoUrl = data.video.videoUrl;
+                        videoId = data.video._id;
+                    }
                 } catch (err) { 
                     console.error("Video upload failed:", err); 
                 }
             }
 
-            if (title && videoUrl) updatedVideos.push({ title, videoUrl });
+            if (title && videoUrl) updatedVideos.push({ title, videoUrl, _id: videoId });
         }
 
         const payload = {
@@ -224,26 +235,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Add video input (with permanent delete)
-    function addVideoInput(title = '', url = '') {
+    function addVideoInput(title = '', url = '', videoId = '') {
         const div = document.createElement('div');
         div.className = "video-input";
+        div.dataset.videoId = videoId;
         div.innerHTML = 
             `<input type="text" placeholder="Video Title" value="${title}">
             <input type="text" placeholder="Video URL" value="${url}">
-            <input type="file" accept="video/*">
+            <input type="file" accept="video/mp4,video/webm,video/ogg">
             <button type="button" class="removeVideo">❌</button>
             <button type="button" class="deleteVideoFromDB">🗑️ Delete from server</button>`;
 
         div.querySelector('.removeVideo').addEventListener('click', () => div.remove());
 
         div.querySelector('.deleteVideoFromDB').addEventListener('click', async () => {
+            if (!videoId) return alert('No video ID to delete');
             if (!confirm('Are you sure you want to permanently delete this video?')) return;
 
             try {
-                const res = await fetch(`${API_BASE}/api/videos/delete`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ videoUrl: url, matchId })
+                const res = await fetch(`${API_BASE}/api/videos/${videoId}`, {
+                    method: 'DELETE'
                 });
                 const data = await res.json();
                 if (res.ok) {
@@ -251,7 +262,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     div.remove();
                     await fetchMatchDetails(); // refresh list from backend
                 } else {
-                    alert('Delete failed: ' + data.error);
+                    alert('Delete failed: ' + data.message);
                 }
             } catch (err) {
                 console.error(err);
