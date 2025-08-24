@@ -29,7 +29,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!value) return value;
         const trimmed = value.trim();
         if (/^https?:\/\//i.test(trimmed)) return trimmed;
-        return trimmed;
+        if (trimmed.startsWith('/uploads/')) return API_BASE + trimmed;
+        return `${API_BASE}/uploads/videos/${trimmed}`;
+    }
+
+    function isDirectVideoFile(src) {
+        return /\.(mp4|webm|ogg)(\?.*)?$/i.test(src);
     }
 
     let matchId = new URLSearchParams(window.location.search).get('matchId')
@@ -104,10 +109,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Videos
             const videos = details.videos || [];
             if (videos.length) {
-                matchStatsContainer.innerHTML += `<h3>Match Videos</h3>`;
+                matchStatsContainer.innerHTML += `<h3>Match Videos</h3><div id="videos-render"></div>`;
+                const videosRender = document.getElementById('videos-render');
                 videos.forEach(video => {
                     const src = normalizeVideoPath(video.videoUrl);
-                    matchStatsContainer.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
+                    if (isDirectVideoFile(src)) {
+                        videosRender.innerHTML += 
+                            `<div>
+                                <strong>${video.title || 'Video'}</strong><br>
+                                <video src="${src}" width="320" controls></video>
+                            </div>`;
+                    } else {
+                        videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
+                    }
                 });
             }
 
@@ -152,12 +166,46 @@ document.addEventListener('DOMContentLoaded', async () => {
                 time: g.querySelector('input[placeholder="Goal Time"]').value.trim()
             })).filter(g => g.player && g.time);
 
-        // Videos (URL only)
-        const updatedVideos = [];
+        // Handle videos
         const videoInputs = Array.from(videoDetailsContainer.querySelectorAll('.video-input'));
+        const updatedVideos = [];
+
         for (let vi of videoInputs) {
             const title = vi.querySelector('input[placeholder="Video Title"]').value.trim();
-            const videoUrl = vi.querySelector('input[placeholder="Video URL"]').value.trim();
+            const urlInput = vi.querySelector('input[placeholder="Video URL"]');
+            const fileInput = vi.querySelector('input[type="file"]');
+            let videoUrl = urlInput.value.trim();
+
+            if (fileInput && fileInput.files.length) {
+                const file = fileInput.files[0];
+                const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+                if (!allowedTypes.includes(file.type)) {
+                    alert('Invalid video type. Use MP4, WEBM, or OGG.');
+                    continue;
+                }
+
+                const formData = new FormData();
+                formData.append('video', file);
+                formData.append('matchId', matchId);
+
+                try {
+                    const res = await fetch(`${API_BASE}/api/videos/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.video && data.video.videoUrl) {
+                        videoUrl = data.video.videoUrl;
+                    } else {
+                        alert('Video upload failed: ' + (data.message || 'Unknown error'));
+                        continue;
+                    }
+                } catch (err) {
+                    console.error("Video upload failed:", err);
+                    continue;
+                }
+            }
+
             if (title && videoUrl) updatedVideos.push({ title, videoUrl });
         }
 
@@ -190,15 +238,41 @@ document.addEventListener('DOMContentLoaded', async () => {
         goalDetailsContainer.appendChild(div);
     }
 
-    // Add video input (URL only)
+    // Add video input
     function addVideoInput(title = '', url = '') {
         const div = document.createElement('div');
         div.className = "video-input";
-        div.innerHTML = 
+        div.innerHTML =
             `<input type="text" placeholder="Video Title" value="${title}">
             <input type="text" placeholder="Video URL" value="${url}">
-            <button type="button" class="removeVideo">❌ Remove</button>`;
+            <input type="file" accept="video/mp4,video/webm,video/ogg">
+            <button type="button" class="removeVideo">❌ Remove from form</button>
+            <button type="button" class="deleteVideoFromDB">🗑️ Delete from server</button>`;
+
         div.querySelector('.removeVideo').addEventListener('click', () => div.remove());
+
+        div.querySelector('.deleteVideoFromDB').addEventListener('click', async () => {
+            if (!url || !confirm('Are you sure you want to permanently delete this video?')) return;
+            try {
+                const res = await fetch(`${API_BASE}/api/videos/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ videoUrl: url, matchId })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    alert('Video deleted permanently!');
+                    div.remove();
+                    await fetchMatchDetails();
+                } else {
+                    alert('Delete failed: ' + data.message || 'Unknown error');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error deleting video');
+            }
+        });
+
         videoDetailsContainer.appendChild(div);
     }
 
