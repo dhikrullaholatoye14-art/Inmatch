@@ -65,7 +65,7 @@ mongoose.connect(process.env.MONGO_URI, {
 .catch(err => console.log('❌ Error connecting to MongoDB:', err));
 
 // Import Models
-require('./models/matchDetails');
+require('../models/matchDetails');
 
 // ✅ Socket.io setup
 const server = http.createServer(app);
