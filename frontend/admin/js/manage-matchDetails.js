@@ -155,7 +155,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             const urlInput = vi.querySelector('input[placeholder="Video URL"]');
             const fileInput = vi.querySelector('input[type="file"]');
             let videoUrl = urlInput.value.trim();
-            let videoId = vi.dataset.videoId || '';
 
             // Upload new file if selected
             if (fileInput && fileInput.files.length) {
@@ -166,19 +165,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     continue;
                 }
                 const formData = new FormData();
-                formData.append("video", file);
+                formData.append("video", file); // name matches multer
                 formData.append("matchId", matchId);
                 try {
                     const res = await fetch(`${API_BASE}/api/videos/upload`, { method: "POST", body: formData });
                     const data = await res.json();
                     if (data.video && data.video.videoUrl) {
                         videoUrl = data.video.videoUrl;
-                        videoId = data.video._id;
                     }
                 } catch (err) { console.error("Video upload failed:", err); }
             }
 
-            if (title && videoUrl) updatedVideos.push({ title, videoUrl, _id: videoId });
+            if (title && videoUrl) updatedVideos.push({ title, videoUrl }); // sanitized
         }
 
         const payload = {
@@ -218,7 +216,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         div.innerHTML = 
             `<input type="text" placeholder="Video Title" value="${title}">
             <input type="text" placeholder="Video URL" value="${url}">
-            <input type="file" accept="video/mp4,video/webm,video/ogg">
+            <input type="file" name="video" accept="video/mp4,video/webm,video/ogg">
             <button type="button" class="removeVideo">❌</button>
             <button type="button" class="deleteVideoFromDB">🗑️ Delete from server</button>`;
 
@@ -252,3 +250,4 @@ document.addEventListener('DOMContentLoaded', async () => {
         await fetchMatchDetails();
     }
 });
+

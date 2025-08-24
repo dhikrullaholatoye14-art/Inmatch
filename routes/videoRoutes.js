@@ -50,12 +50,9 @@ router.get('/:id', async (req, res, next) => {
 });
 
 // POST /api/videos/delete  <-- ✅ matches your frontend
-router.post('/delete', async (req, res, next) => {
+router.delete('/:id', async (req, res, next) => {
   try {
-    const { videoUrl } = req.body;
-    if (!videoUrl) return res.status(400).json({ message: 'videoUrl required' });
-
-    const video = await Video.findOne({ videoUrl });
+    const video = await Video.findById(req.params.id);
     if (!video) return res.status(404).json({ message: 'Video not found' });
 
     await deleteFromCloudinary(video.publicId);
