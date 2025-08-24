@@ -7,7 +7,7 @@ const Video = require('../models/video'); // lowercase 'video'
 // --- Multer setup ---
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads')); // save in /uploads
+    cb(null, path.join(__dirname, '../src/uploads')); // save in /uploads
   },
   filename: function (req, file, cb) {
     const uniqueName = Date.now() + '-' + file.originalname;
