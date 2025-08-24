@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (fileInput && fileInput.files.length) {
                 const formData = new FormData();
-                formData.append("videoFile", fileInput.files[0]);
+                formData.append("video", fileInput.files[0]); // ✅ changed from "videoFile" to "video"
                 formData.append("matchId", matchId);
 
                 try {
@@ -185,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         body: formData 
                     });
                     const data = await res.json();
-                    if (data.url) videoUrl = data.url;
+                    if (data.video && data.video.videoUrl) videoUrl = data.video.videoUrl; // ✅ changed from data.url
                 } catch (err) { 
                     console.error("Video upload failed:", err); 
                 }
