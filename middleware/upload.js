@@ -1,6 +1,6 @@
 const multer = require('multer');
 
-// Memory storage to avoid file system issues
+// Memory storage to handle file buffers directly
 const storage = multer.memoryStorage();
 
 const fileFilter = (req, file, cb) => {
@@ -11,5 +11,5 @@ const fileFilter = (req, file, cb) => {
 module.exports = multer({
   storage,
   fileFilter,
-  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB max
 });
