@@ -101,9 +101,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 videos.forEach(video => {
                     const src = video.videoUrl;
                     if (!video.isURL) {
+                        // Local uploaded video file
                         videosRender.innerHTML += `<div><strong>${video.title}</strong><br>
-                            <video src="${src}" width="320" controls></video></div>`;
+                            <video width="320" controls>
+                                <source src="${API_BASE}/${src}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video></div>`;
                     } else {
+                        // External URL (YouTube, etc.)
                         videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
                     }
                 });
@@ -197,8 +202,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         vi.dataset.videoId = videoId;
                         urlInput.value = videoUrl;
                     }
-                } catch 
-(err) { console.error("Video upload failed:", err); alert("Video upload failed. Check console."); continue; }
+                } catch (err) { console.error("Video upload failed:", err); alert("Video upload failed. Check console."); continue; }
                 finally { isUploading = false; }
             }
 
@@ -227,7 +231,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // --- Add goal input ---
     function addGoalInput(team, player = '', time = '') {
         const div = document.createElement('div');
         div.className = `goal-input goal-${team}`;
@@ -239,7 +242,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         goalDetailsContainer.appendChild(div);
     }
 
-    // --- Add video input ---
     function addVideoInput(title = '', url = '', videoId = '', isURL = true) {
         const div = document.createElement('div');
         div.className = "video-input";
@@ -277,7 +279,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         videoDetailsContainer.appendChild(div);
     }
 
-    // --- Initial fetch ---
     if (matchId) {
         await fetchMatchOverview();
         await fetchMatchDetails();
