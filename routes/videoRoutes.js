@@ -46,14 +46,14 @@ router.post('/upload', (req, res, next) => {
       const { title = '' } = req.body;
       if (!req.file) return res.status(400).json({ message: 'No video file uploaded' });
 
-      // Return path relative to /uploads
-      const relativePath = `uploads/${req.file.filename}`;
+     // Build absolute URL
+const fullUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
 
-      const newVideo = new Video({
-        title: title || req.file.originalname,
-        videoUrl: relativePath,
-        isURL: false
-      });
+const newVideo = new Video({
+  title: title || req.file.originalname,
+  videoUrl: fullUrl,   // ✅ now stores full URL
+  isURL: false
+});
 
       await newVideo.save();
 
