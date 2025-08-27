@@ -70,28 +70,35 @@ exports.addMatchDetails = async (req, res) => {
 
 // ✅ Update Match Details (PATCH)
 exports.updateMatchDetails = async (req, res) => {
-    console.log("📝 Incoming PATCH request:", req.body);
-    const { matchId } = req.params;
-    const updates = req.body;
-
+   
     try {
-        if (!mongoose.isValidObjectId(matchId)) {
-            return res.status(400).json({ message: "Invalid match ID format" });
-        }
+    const { stats, goalsDetails, videos } = req.body;
 
-        const updatedDetails = await MatchDetails.findOneAndUpdate(
-            { matchId },
-            { $set: updates },
-            { new: true, runValidators: true }
-        );
+    const update = {};
+    if (stats) update.stats = stats;
+    if (goalsDetails) update.goalsDetails = goalsDetails;
 
-        if (!updatedDetails) {
-            return res.status(404).json({ message: 'Match details not found' });
-        }
-
-        res.status(200).json({ message: 'Match details updated successfully', details: updatedDetails });
-    } catch (error) {
-        console.error("Error updating match details:", error.message, error.stack);
-        res.status(500).json({ message: 'Error updating match details', error: error.message || error });
+    if (Array.isArray(videos)) {
+      // Normalize videos to only fields we allow
+      update.videos = videos.map(v => ({
+        _id: v._id,           // may be undefined for new URL-only items
+        title: v.title,
+        videoUrl: v.videoUrl,
+        isURL: !!v.isURL
+      }));
     }
+
+    const doc = await MatchDetails.findOneAndUpdate(
+      { matchId: req.params.matchId },
+      { $set: update },
+      { new: true, runValidators: true } // no upsert here; require it to exist first
+    );
+
+    if (!doc) return res.status(404).json({ message: 'MatchDetails not found' });
+    return res.json({ details: doc });
+    
+  } catch (err) {
+    console.error('match-details PATCH error:', err);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
 };

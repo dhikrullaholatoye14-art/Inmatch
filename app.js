@@ -5,6 +5,8 @@ const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs');
+
 
 // Load environment variables
 dotenv.config();
@@ -19,7 +21,7 @@ const matchDetailsRoutes = require('./routes/matchDetails');
 const adminRoutes = require('./routes/adminRoutes');
 
 // ✅ Start cron job for cleaning old videos
-require('./utils/cleanupVideos');
+require('./utils/cleanupVideo');
 
 // ✅ CORS Middleware
 app.use(cors({
@@ -37,8 +39,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // ✅ Serve admin frontend
 app.use(express.static('frontend-admin'));
 
-// ✅ Serve uploaded videos folder
-app.use('/uploads', express.static(path.join(__dirname, 'src/uploads')));
+// ✅ Serve uploaded videos folder consistently from /src/uploads
+const UPLOADS_DIR = path.resolve(__dirname, 'src', 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) {
+  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+}
+app.use('/uploads', express.static(UPLOADS_DIR));
+
  
 
 // ✅ API Routes
