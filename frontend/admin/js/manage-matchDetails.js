@@ -192,6 +192,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderVideoInputs();
   });
 
+  // ✅ FIX: Add goal buttons (re-attached)
+  addGoalTeam1Btn.addEventListener('click', () => addGoalInput('team1'));
+  addGoalTeam2Btn.addEventListener('click', () => addGoalInput('team2'));
+
   // Auth/logout (unchanged)
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('authToken');

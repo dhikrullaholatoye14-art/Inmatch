@@ -46,14 +46,15 @@ router.post('/upload', (req, res, next) => {
       const { title = '' } = req.body;
       if (!req.file) return res.status(400).json({ message: 'No video file uploaded' });
 
-     // Build absolute URL
-const fullUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+      // ---- Build absolute HTTPS URL (force https:// even if req.protocol is http)
+      const host = req.get('host');
+      const fullUrl = `https://${host}/uploads/${req.file.filename}`;
 
-const newVideo = new Video({
-  title: title || req.file.originalname,
-  videoUrl: fullUrl,   // ✅ now stores full URL
-  isURL: false
-});
+      const newVideo = new Video({
+        title: title || req.file.originalname,
+        videoUrl: fullUrl,   // ✅ now stores full HTTPS URL
+        isURL: false
+      });
 
       await newVideo.save();
 
