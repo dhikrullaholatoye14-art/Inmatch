@@ -1,9 +1,23 @@
+
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>InMatch | Live Sport Highlights</title>
+  <link rel="icon" href="./images/inmatch logo 1.ico" type="image/x-icon">
+  <link rel="shortcut icon" href="./images/inmatch logo 1.ico" type="image/x-icon">
+  <link rel="icon" href="./images/inmatch logo 1.png" type="image/png">
+
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-P9QV7R892T"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-P9QV7R892T');
+</script>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -22,6 +36,14 @@
       }
     }
   </script>
+
+  <script>
+  window.addEventListener("load", function(){
+    document.getElementById("preloader").style.display = "none";
+    document.getElementById("main-content").style.display = "block";
+  });
+  </script>
+
   
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
@@ -33,6 +55,36 @@
   <script src="https://unpkg.com/scrollreveal"></script>
 
   <style>
+  #preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0d0d0d; /* dark background */
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loader {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #007bff; /* blue color */
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
     .league-card {
       transition: transform 0.3s ease;
     }
@@ -53,7 +105,7 @@
 </head>
 
 <body class="bg-gray-100 dark:bg-gray-900 dark:text-white text-gray-800 font-sans transition-colors duration-300">
-
+  <div id="main-content" style="display:none;">
   <!-- Sticky Header -->
   <header class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white sticky top-0 z-50 shadow-md">
     <div class="max-w-7xl mx-auto py-4 text-center px-4 relative">
@@ -73,6 +125,12 @@
       </button>
     </div>
   </header>
+  <div id="main-content" style="display:none;">
+    <!-- Preloader -->
+  <div id="preloader">
+    <div class="loader"></div>
+    <p>Loading InMatch...</p>
+  </div>
 
   <!-- League Grid Section with Dot Grid Background -->
   <main class="px-3 md:px-10 lg:px-40 py-20" style="background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/dot-grid.png');">
@@ -92,7 +150,7 @@
       </button>
     </div>
   </main>
-
+    
     <!-- Footer -->
   <footer class="bg-gray-900 text-white py-10 text-center text-sm">
     <div class="social-icons mb-4">
@@ -126,7 +184,7 @@
     class="hidden fixed z-50 bottom-8 right-8 border-0 w-12 h-12 rounded-full drop-shadow-md bg-blue-600 text-white text-xl font-bold hover:bg-blue-700 transition">
     ↑
   </button>
-
+  </div>
   <!-- Script -->
   <script>
   const leaguesContainer = document.getElementById('leagues-container');
