@@ -41,16 +41,13 @@
     .league-card {
       transition: transform 0.3s ease;
     }
-
     .league-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
-
     .cta-section {
       transition: background-color 0.5s ease;
     }
-
     .cta-section:hover {
       background-color: blueviolet;
     }
@@ -62,7 +59,7 @@
   <!-- Sticky Header -->
   <header class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white sticky top-0 z-50 shadow-md">
     <div class="max-w-7xl mx-auto py-4 text-center px-4 relative">
-      <a href="index.html" class="flex items-center space-x-3"></a>
+      <a href="index.html" class="flex items-center space-x-3">
         <img src="./images/inmatch logo.png" alt="InMatch Logo" class="h-10 mx-auto mb-2">
       </a>
       <p class="text-lg">Your Ultimate Destination for Live Football Scores and Highlights</p>
@@ -79,11 +76,17 @@
     </div>
   </header>
 
-  <!-- League Grid Section with Dot Grid Background -->
+  <!-- League Grid Section with Loader -->
   <main class="px-3 md:px-10 lg:px-40 py-20" style="background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/dot-grid.png');">
-    <div id="leagues-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      <!-- League cards injected here -->
+    
+    <!-- Loader -->
+    <div id="loader" class="flex flex-col items-center justify-center py-20">
+      <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+      <p class="mt-4 text-lg text-blue-600">Loading leagues...</p>
     </div>
+
+    <!-- League Grid -->
+    <div id="leagues-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
 
     <!-- Call to Action Banner -->
     <div class="w-full bg-indigo-600 shadow-xl shadow-indigo-200 py-10 px-6 sm:px-20 flex flex-col sm:flex-row justify-between items-center mt-10 cta-section">
@@ -98,7 +101,7 @@
     </div>
   </main>
 
-    <!-- Footer -->
+  <!-- Footer -->
   <footer class="bg-gray-900 text-white py-10 text-center text-sm">
     <div class="social-icons mb-4">
       <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-facebook-f"></i></a>
@@ -125,7 +128,6 @@
     <p class="text-gray-400">&copy; 2025 InMatch. All rights reserved.</p>
   </footer>
 
-
   <!-- Back to Top Button -->
   <button id="to-top-button" onclick="goToTop()" title="Go To Top"
     class="hidden fixed z-50 bottom-8 right-8 border-0 w-12 h-12 rounded-full drop-shadow-md bg-blue-600 text-white text-xl font-bold hover:bg-blue-700 transition">
@@ -135,26 +137,30 @@
   <!-- Script -->
   <script>
   const leaguesContainer = document.getElementById('leagues-container');
+  const loader = document.getElementById('loader');
   const showMoreBtn = document.getElementById('show-more-btn');
   const toTopButton = document.getElementById('to-top-button');
   const themeToggle = document.getElementById('toggle-theme');
   const html = document.documentElement;
-  const API_BASE = "https://inmatch-backend-0csv.onrender.com"; // your Render backend URL
+  const API_BASE = "https://inmatch-backend-0csv.onrender.com"; // backend URL
 
   let allLeagues = [];
   let displayedCount = 0;
   const STEP = 6;
 
-  // Fetch leagues from server
+  // Fetch leagues
   async function fetchLeagues() {
+    loader.style.display = "flex";  
+    leaguesContainer.innerHTML = ""; 
+
     try {
       const res = await fetch(`${API_BASE}/api/leagues`);
       const leagues = await res.json();
-
-      // If new leagues exist, append them to the array
       allLeagues = leagues;
     } catch (err) {
       leaguesContainer.innerHTML = '<p class="text-red-600">Error loading leagues.</p>';
+    } finally {
+      loader.style.display = "none"; 
     }
   }
 
@@ -191,13 +197,13 @@
     });
   }
 
-  // When clicking "Show More"
+  // Show more leagues
   showMoreBtn.addEventListener('click', async () => {
-    await fetchLeagues(); // Always get the latest from server
+    await fetchLeagues(); 
     renderMoreLeagues();
   });
 
-  // Scroll to top functionality
+  // Scroll to top button
   window.onscroll = function () {
     if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
       toTopButton.classList.remove("hidden");
@@ -223,7 +229,7 @@
     await fetchLeagues();
     renderMoreLeagues();
   })();
-</script>
+  </script>
 
 </body>
 </html>
