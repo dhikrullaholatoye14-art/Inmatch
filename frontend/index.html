@@ -3,14 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>InMatch | Live Sport Highlights</title>
+  <title>InMatch | Football Highlights</title>
 
-  <!-- Favicon -->
-  <link rel="icon" href="./images/inmatch logo 1.ico" type="image/x-icon">
-  <link rel="shortcut icon" href="./images/inmatch logo 1.ico" type="image/x-icon">
-  <link rel="icon" href="./images/inmatch logo 1.png" type="image/png">
-
-  <!-- Tailwind CSS CDN -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -18,218 +13,210 @@
       theme: {
         extend: {
           colors: {
-            primary: '#1e3a8a',
+            brandGreen: '#0f7b3f',
+            brandYellow: '#ffd24a',
+            darkBg: '#0b0b0b',
+            cardBg: '#0f1724',
           },
           fontFamily: {
-            sans: ['Poppins', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
           }
         }
       }
     }
   </script>
-  
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome Free CDN -->
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" />
 
-  <!-- ScrollReveal CDN -->
+  <!-- ScrollReveal -->
   <script src="https://unpkg.com/scrollreveal"></script>
-
-  <style>
-    .league-card {
-      transition: transform 0.3s ease;
-    }
-    .league-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
-    .cta-section {
-      transition: background-color 0.5s ease;
-    }
-    .cta-section:hover {
-      background-color: blueviolet;
-    }
-  </style>
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 dark:text-white text-gray-800 font-sans transition-colors duration-300">
+<body class="bg-darkBg text-white font-sans">
 
-  <!-- Sticky Header -->
-  <header class="bg-gradient-to-r from-indigo-600 to-blue-500 text-white sticky top-0 z-50 shadow-md">
-    <div class="max-w-7xl mx-auto py-4 text-center px-4 relative">
-      <a href="index.html" class="flex items-center space-x-3">
-        <img src="./images/inmatch logo.png" alt="InMatch Logo" class="h-10 mx-auto mb-2">
+  <!-- HEADER -->
+  <header class="glass fixed w-full top-0 z-50 border-b border-gray-800 bg-black/70 backdrop-blur">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-16">
+      <!-- Logo -->
+      <a href="index.html" class="flex items-center gap-3">
+        <img src="./images/inmatch logo.png" class="h-10" alt="InMatch">
+        <span class="font-bold tracking-wide">InMatch</span>
       </a>
-      <p class="text-lg">Your Ultimate Destination for Live Football Scores and Highlights</p>
 
-      <!-- Admin Login Icon -->
-      <a href="./admin/admin-login.html" target="_blank" rel="noopener noreferrer" class="absolute top-4 right-14 text-white hover:text-yellow-300 transition">
-        <i class="fas fa-user text-2xl"></i>
-      </a>
-     
-      <!-- Dark Mode Toggle Button -->
-      <button id="toggle-theme" class="absolute top-4 right-4 text-white hover:text-yellow-300 text-2xl transition">
-        <i class="fas fa-moon"></i>
-      </button>
+      <!-- Nav -->
+      <nav class="hidden md:flex items-center gap-6 text-sm">
+        <a href="#" class="hover:text-brandYellow">Home</a>
+        <a href="#" class="hover:text-brandYellow">Leagues</a>
+        <a href="#" class="hover:text-brandYellow">Highlights</a>
+        <a href="#" class="hover:text-brandYellow">Live Scores</a>
+      </nav>
+
+      <!-- Right side -->
+      <div class="flex items-center gap-4">
+        <!-- Admin -->
+        <a href="./admin/admin-login.html" class="hover:text-brandYellow">
+          <i class="fas fa-user text-xl"></i>
+        </a>
+        <!-- Dark mode -->
+        <button id="toggle-theme" class="hover:text-brandYellow">
+          <i class="fas fa-moon text-xl"></i>
+        </button>
+      </div>
     </div>
   </header>
 
-  <!-- League Grid Section with Loader -->
-  <main class="px-3 md:px-10 lg:px-40 py-20" style="background-image: url('https://www.toptal.com/designers/subtlepatterns/uploads/dot-grid.png');">
-    
-    <!-- Loader -->
-    <div id="loader" class="flex flex-col items-center justify-center py-20">
-      <div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      <p class="mt-4 text-lg text-blue-600">Loading leagues...</p>
-    </div>
+  <main class="pt-24">
 
-    <!-- League Grid -->
-    <div id="leagues-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"></div>
+    <!-- HERO -->
+    <section class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
+      <div>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-brandGreen leading-tight">
+          The #1 Place for African Football Highlights
+        </h1>
+        <p class="mt-4 text-gray-300">
+          Watch football highlights from Africa's biggest leagues and teams. Fast, focused, and built for fans.
+        </p>
 
-    <!-- Call to Action Banner -->
-    <div class="w-full bg-indigo-600 shadow-xl shadow-indigo-200 py-10 px-6 sm:px-20 flex flex-col sm:flex-row justify-between items-center mt-10 cta-section">
-      <p class="text-white text-center sm:text-left mb-4 sm:mb-0">
-        <span class="text-4xl font-medium">Explore More Leagues</span> <br>
-        <span class="text-lg">Find teams, matches, and highlights from the best leagues around the world.</span>
-      </p>
-      <button id="show-more-btn"
-        class="px-5 py-3 font-medium text-slate-700 shadow-xl hover:bg-white duration-150 bg-yellow-400 rounded-md">
-        Show More Leagues
-      </button>
-    </div>
+        <div class="mt-6 flex gap-3 flex-wrap">
+          <a href="#" class="px-5 py-3 bg-white text-black rounded-md font-semibold">Explore More Leagues</a>
+          <a href="#" class="px-5 py-3 bg-brandYellow text-black rounded-md font-semibold">Today's Matches</a>
+        </div>
+      </div>
+
+      <div class="rounded-xl overflow-hidden shadow-lg">
+        <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=1400&auto=format&fit=crop" alt="hero" class="w-full object-cover h-72 md:h-full"/>
+      </div>
+    </section>
+
+    <!-- TRENDING HIGHLIGHTS -->
+    <section class="max-w-7xl mx-auto px-4 mt-16">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-semibold">Trending Highlights</h2>
+        <a href="#" class="text-sm text-gray-400 hover:text-brandYellow">View all</a>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <article class="bg-cardBg rounded-lg overflow-hidden shadow hover:scale-[1.02] transition">
+          <img src="https://images.unsplash.com/photo-1508804185872-d7badad00f7d?q=80&w=1200&auto=format&fit=crop" class="h-44 w-full object-cover"/>
+          <div class="p-4">
+            <h3 class="font-semibold">Manchester United 2 - 1 Chelsea</h3>
+            <p class="text-sm text-gray-400">Premier League</p>
+          </div>
+        </article>
+
+        <article class="bg-cardBg rounded-lg overflow-hidden shadow hover:scale-[1.02] transition">
+          <img src="https://images.unsplash.com/photo-1542736667-069246bdbc16?q=80&w=1200&auto=format&fit=crop" class="h-44 w-full object-cover"/>
+          <div class="p-4">
+            <h3 class="font-semibold">Barcelona 3 - 0 Real Madrid</h3>
+            <p class="text-sm text-gray-400">La Liga</p>
+          </div>
+        </article>
+
+        <article class="bg-cardBg rounded-lg overflow-hidden shadow hover:scale-[1.02] transition">
+          <img src="https://images.unsplash.com/photo-1517927033932-b7d2e46f0f24?q=80&w=1200&auto=format&fit=crop" class="h-44 w-full object-cover"/>
+          <div class="p-4">
+            <h3 class="font-semibold">PSG 1 - 0 Lyon</h3>
+            <p class="text-sm text-gray-400">Ligue 1</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- LEAGUES -->
+    <section class="max-w-7xl mx-auto px-4 mt-16">
+      <h2 class="text-2xl font-semibold">Leagues</h2>
+      <div id="leagues-container" class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+        <!-- Leagues injected dynamically -->
+      </div>
+      <div class="text-center mt-8">
+        <button id="show-more-btn" class="px-5 py-3 bg-brandYellow text-black rounded-md font-semibold">Show More Leagues</button>
+      </div>
+    </section>
+
   </main>
 
-  <!-- Footer -->
-  <footer class="bg-gray-900 text-white py-10 text-center text-sm">
-    <div class="social-icons mb-4">
-      <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-facebook-f"></i></a>
-      <a href="https://x.com/inmatchdotcom?s=21" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-twitter"></i></a>
-      <a href="https://www.instagram.com/inmatchdotcom?igsh=MTV5b2tvNWxlMzVlcA%3D%3D&utm_source=qr" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-instagram"></i></a>
-      <a href="#" class="mx-2 text-xl hover:text-indigo-400"><i class="fab fa-youtube"></i></a>
+  <!-- FOOTER -->
+  <footer class="bg-black py-10 text-center text-sm mt-20">
+    <div class="mb-4 flex justify-center gap-6 text-xl">
+      <a href="#" class="hover:text-brandGreen"><i class="fab fa-facebook-f"></i></a>
+      <a href="#" class="hover:text-brandGreen"><i class="fab fa-twitter"></i></a>
+      <a href="https://www.instagram.com/inmatchdotcom" class="hover:text-brandGreen"><i class="fab fa-instagram"></i></a>
+      <a href="#" class="hover:text-brandGreen"><i class="fab fa-youtube"></i></a>
     </div>
-
-    <!-- Community Links -->
-    <div class="mb-6">
-      <a href="https://t.me/+vZ4jd-sDADw0YjM0" target="_blank" class="inline-flex items-center mx-3 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition">
-        <i class="fab fa-telegram-plane mr-2"></i> Join our Telegram
-      </a>
-      <a href="https://chat.whatsapp.com/LVtILgES9hUGcwn5hZeqee" target="_blank" class="inline-flex items-center mx-3 px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg text-white font-medium transition">
-        <i class="fab fa-whatsapp mr-2"></i> Join our WhatsApp
-      </a>
-    </div>
-
-    <nav class="mb-4">
-      <a href="contact.html" class="mx-2 hover:text-indigo-400">Contact Us</a> |
-      <a href="about.html" class="mx-2 hover:text-indigo-400">About</a> |
-      <a href="privacy.html" class="mx-2 hover:text-indigo-400">Privacy Policy</a>
-    </nav>
     <p class="text-gray-400">&copy; 2025 InMatch. All rights reserved.</p>
   </footer>
 
-  <!-- Back to Top Button -->
-  <button id="to-top-button" onclick="goToTop()" title="Go To Top"
-    class="hidden fixed z-50 bottom-8 right-8 border-0 w-12 h-12 rounded-full drop-shadow-md bg-blue-600 text-white text-xl font-bold hover:bg-blue-700 transition">
-    ↑
-  </button>
+  <!-- Mobile Bottom Nav -->
+  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-cardBg rounded-full p-2 flex justify-around md:hidden">
+    <a href="#" class="text-sm text-gray-300 hover:text-brandYellow">Home</a>
+    <a href="#" class="text-sm text-gray-300 hover:text-brandYellow">Highlights</a>
+    <a href="#" class="text-sm text-gray-300 hover:text-brandYellow">Leagues</a>
+    <a href="#" class="text-sm text-gray-300 hover:text-brandYellow">Profile</a>
+  </nav>
 
-  <!-- Script -->
+  <!-- SCRIPT -->
   <script>
-  const leaguesContainer = document.getElementById('leagues-container');
-  const loader = document.getElementById('loader');
-  const showMoreBtn = document.getElementById('show-more-btn');
-  const toTopButton = document.getElementById('to-top-button');
-  const themeToggle = document.getElementById('toggle-theme');
-  const html = document.documentElement;
-  const API_BASE = "https://inmatch-backend-0csv.onrender.com"; // backend URL
+    const leaguesContainer = document.getElementById('leagues-container');
+    const showMoreBtn = document.getElementById('show-more-btn');
+    const themeToggle = document.getElementById('toggle-theme');
+    const html = document.documentElement;
+    const API_BASE = "https://inmatch-backend-0csv.onrender.com";
 
-  let allLeagues = [];
-  let displayedCount = 0;
-  const STEP = 6;
+    let allLeagues = [];
+    let displayedCount = 0;
+    const STEP = 6;
 
-  // Fetch leagues
-  async function fetchLeagues() {
-    loader.style.display = "flex";  
-    leaguesContainer.innerHTML = ""; 
-
-    try {
-      const res = await fetch(`${API_BASE}/api/leagues`);
-      const leagues = await res.json();
-      allLeagues = leagues;
-    } catch (err) {
-      leaguesContainer.innerHTML = '<p class="text-red-600">Error loading leagues.</p>';
-    } finally {
-      loader.style.display = "none"; 
+    async function fetchLeagues() {
+      try {
+        const res = await fetch(`${API_BASE}/api/leagues`);
+        allLeagues = await res.json();
+      } catch (err) {
+        leaguesContainer.innerHTML = '<p class="text-red-500">Error loading leagues.</p>';
+      }
     }
-  }
 
-  function renderMoreLeagues() {
-    const nextBatch = allLeagues.slice(displayedCount, displayedCount + STEP);
+    function renderMoreLeagues() {
+      const nextBatch = allLeagues.slice(displayedCount, displayedCount + STEP);
+      nextBatch.forEach(league => {
+        const card = document.createElement('a');
+        card.href = `match.html?leagueId=${league._id}`;
+        card.className = 'bg-cardBg rounded-lg p-4 flex flex-col items-center hover:scale-[1.05] transition';
+        card.innerHTML = `
+          <div class="w-16 h-16 bg-gray-700 rounded-full overflow-hidden mb-3">
+            <img src="${league.logo}" alt="${league.name}" class="w-full h-full object-cover"/>
+          </div>
+          <h3 class="text-sm">${league.name}</h3>
+        `;
+        leaguesContainer.appendChild(card);
+      });
+      displayedCount += nextBatch.length;
+      if (displayedCount >= allLeagues.length) {
+        showMoreBtn.disabled = true;
+        showMoreBtn.classList.add('opacity-50','cursor-not-allowed');
+        showMoreBtn.textContent = 'No More Leagues';
+      }
+    }
 
-    nextBatch.forEach((league) => {
-      const card = document.createElement('a');
-      card.href = `match.html?leagueId=${league._id}`;
-      card.className = 'league-card bg-white dark:bg-gray-800 rounded-lg shadow-xl hover:bg-slate-50 cursor-pointer transition duration-300 overflow-hidden flex flex-col items-center text-center p-5';
-      card.innerHTML = `
-        <div class="w-24 h-24 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mb-4">
-          <img src="${league.logo}" alt="${league.name}" class="w-full h-full object-cover" />
-        </div>
-        <h3 class="text-lg font-semibold">${league.name}</h3>
-      `;
-      leaguesContainer.appendChild(card);
+    showMoreBtn.addEventListener('click', async () => {
+      await fetchLeagues();
+      renderMoreLeagues();
     });
 
-    displayedCount += nextBatch.length;
-
-    if (displayedCount >= allLeagues.length) {
-      showMoreBtn.disabled = true;
-      showMoreBtn.classList.add('opacity-50', 'cursor-not-allowed');
-      showMoreBtn.textContent = 'No More Leagues';
-    }
-
-    ScrollReveal().reveal('.league-card', {
-      delay: 100,
-      distance: '30px',
-      origin: 'bottom',
-      duration: 600,
-      interval: 100
+    themeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      const icon = themeToggle.querySelector('i');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
     });
-  }
 
-  // Show more leagues
-  showMoreBtn.addEventListener('click', async () => {
-    await fetchLeagues(); 
-    renderMoreLeagues();
-  });
-
-  // Scroll to top button
-  window.onscroll = function () {
-    if (document.body.scrollTop > 200 || document.documentElement.scrollTop > 200) {
-      toTopButton.classList.remove("hidden");
-    } else {
-      toTopButton.classList.add("hidden");
-    }
-  };
-
-  function goToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  // Dark mode toggle
-  themeToggle.addEventListener('click', () => {
-    html.classList.toggle('dark');
-    const icon = themeToggle.querySelector('i');
-    icon.classList.toggle('fa-moon');
-    icon.classList.toggle('fa-sun');
-  });
-
-  // Start
-  (async () => {
-    await fetchLeagues();
-    renderMoreLeagues();
-  })();
+    (async () => {
+      await fetchLeagues();
+      renderMoreLeagues();
+    })();
   </script>
-
 </body>
 </html>
