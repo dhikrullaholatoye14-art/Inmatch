@@ -35,10 +35,13 @@
   <!-- HEADER -->
   <header class="fixed w-full top-0 z-50 bg-black/80 backdrop-blur border-b border-gray-800">
     <div class="max-w-6xl mx-auto flex items-center justify-between h-14 px-4">
+      <!-- Logo -->
       <a href="index.html" class="flex items-center gap-2">
         <img src="./images/inmatch logo.png" class="h-8" alt="InMatch">
         <span class="font-bold">InMatch</span>
       </a>
+
+      <!-- Search + Toggle -->
       <div class="flex items-center gap-4">
         <input type="text" placeholder="Search" class="hidden sm:block px-2 py-1 rounded bg-cardBg text-sm focus:outline-none"/>
         <a href="./admin/admin-login.html" class="hover:text-brandYellow"><i class="fas fa-user text-lg"></i></a>
@@ -48,9 +51,53 @@
   </header>
 
   <main class="pt-16 pb-20 max-w-3xl mx-auto px-3">
-    <div id="matches-container" class="space-y-8">
-      <p class="text-center text-gray-400">Loading leagues & matches...</p>
+
+    <!-- NAV TABS -->
+    <div class="flex justify-around border-b border-gray-700 mb-4 text-sm">
+      <button class="tab-btn py-2 px-3 border-b-2 border-brandYellow font-semibold">Today</button>
+      <button class="tab-btn py-2 px-3 hover:text-brandYellow">Yesterday</button>
+      <button class="tab-btn py-2 px-3 hover:text-brandYellow">Tomorrow</button>
+      <button class="tab-btn py-2 px-3 hover:text-brandYellow">Live</button>
     </div>
+
+    <!-- MATCH LIST -->
+    <div id="matches-container" class="space-y-6">
+      <!-- Example League -->
+      <div>
+        <h2 class="text-brandGreen font-semibold mb-2">Premier League</h2>
+        <div class="bg-cardBg rounded-md p-3 flex justify-between items-center mb-2">
+          <div>
+            <p>Manchester United vs Chelsea</p>
+            <p class="text-sm text-gray-400">FT</p>
+          </div>
+          <div class="font-bold">2 - 1</div>
+          <a href="#" class="text-sm text-brandYellow hover:underline">Highlights</a>
+        </div>
+
+        <div class="bg-cardBg rounded-md p-3 flex justify-between items-center">
+          <div>
+            <p>Arsenal vs Liverpool</p>
+            <p class="text-sm text-gray-400">70’ Live</p>
+          </div>
+          <div class="font-bold">1 - 1</div>
+          <span class="text-red-500 text-sm">LIVE</span>
+        </div>
+      </div>
+
+      <!-- Another League -->
+      <div>
+        <h2 class="text-brandGreen font-semibold mb-2">La Liga</h2>
+        <div class="bg-cardBg rounded-md p-3 flex justify-between items-center mb-2">
+          <div>
+            <p>Barcelona vs Real Madrid</p>
+            <p class="text-sm text-gray-400">FT</p>
+          </div>
+          <div class="font-bold">3 - 0</div>
+          <a href="#" class="text-sm text-brandYellow hover:underline">Highlights</a>
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <!-- MOBILE BOTTOM NAV -->
@@ -75,73 +122,18 @@
 
   <!-- SCRIPT -->
   <script>
-    const API_BASE = "https://inmatch-backend-0csv.onrender.com";
-    const matchesContainer = document.getElementById("matches-container");
-    const themeToggle = document.getElementById("toggle-theme");
+    const themeToggle = document.getElementById('toggle-theme');
     const html = document.documentElement;
 
-    // Dark mode toggle
-    themeToggle.addEventListener("click", () => {
-      html.classList.toggle("dark");
-      const icon = themeToggle.querySelector("i");
-      icon.classList.toggle("fa-moon");
-      icon.classList.toggle("fa-sun");
+    themeToggle.addEventListener('click', () => {
+      html.classList.toggle('dark');
+      const icon = themeToggle.querySelector('i');
+      icon.classList.toggle('fa-moon');
+      icon.classList.toggle('fa-sun');
     });
 
-    // Fetch leagues and their matches
-    async function fetchLeaguesAndMatches() {
-      matchesContainer.innerHTML = `<p class="text-center text-gray-400">Loading...</p>`;
-      try {
-        const res = await fetch(`${API_BASE}/api/leagues`);
-        const leagues = await res.json();
-
-        // Fetch matches for each league
-        const leagueData = await Promise.all(leagues.map(async league => {
-          try {
-            const mRes = await fetch(`${API_BASE}/api/matches?leagueId=${league._id}`);
-            const matches = await mRes.json();
-            return { ...league, matches };
-          } catch (err) {
-            return { ...league, matches: [] };
-          }
-        }));
-
-        renderLeagues(leagueData);
-      } catch (err) {
-        matchesContainer.innerHTML = `<p class="text-center text-red-500">Error loading data</p>`;
-      }
-    }
-
-    // Render leagues with matches
-    function renderLeagues(leagueData) {
-      matchesContainer.innerHTML = leagueData.map(league => `
-        <div>
-          <h2 class="text-brandGreen font-semibold mb-2 flex items-center gap-2">
-            <img src="${league.logo}" alt="${league.name}" class="w-6 h-6"> 
-            ${league.name}
-          </h2>
-          ${
-            league.matches.length > 0
-            ? league.matches.map(match => `
-              <div class="bg-cardBg rounded-md p-3 flex justify-between items-center mb-2">
-                <div>
-                  <p>${match.team1} vs ${match.team2}</p>
-                  <p class="text-sm text-gray-400">${match.status || match.time || ''}</p>
-                </div>
-                <div class="font-bold">${match.score || '-'}</div>
-                ${match.highlightUrl 
-                  ? `<a href="${match.highlightUrl}" class="text-sm text-brandYellow hover:underline">Highlights</a>` 
-                  : ``}
-              </div>
-            `).join("")
-            : `<p class="text-sm text-gray-400">No matches available</p>`
-          }
-        </div>
-      `).join("");
-    }
-
-    // Start
-    fetchLeaguesAndMatches();
+    // Later, you’ll fetch matches from your backend
+    // and render them inside #matches-container dynamically.
   </script>
 </body>
 </html>
