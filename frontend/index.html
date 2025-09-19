@@ -125,8 +125,8 @@
             ? league.matches.map(match => `
               <div class="bg-cardBg rounded-md p-3 flex justify-between items-center mb-2">
                 <div>
-                  <p>${match.homeTeam} vs ${match.awayTeam}</p>
-                  <p class="text-sm text-gray-400">${match.status || ''}</p>
+                  <p>${match.team1} vs ${match.team2}</p>
+                  <p class="text-sm text-gray-400">${match.status || match.time || ''}</p>
                 </div>
                 <div class="font-bold">${match.score || '-'}</div>
                 ${match.highlightUrl 
