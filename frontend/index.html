@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>InMatch | Football Highlights</title>
+  <title>InMatch | Live Scores</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -16,7 +16,7 @@
             brandGreen: '#0f7b3f',
             brandYellow: '#ffd24a',
             darkBg: '#0b0b0b',
-            cardBg: '#0f1724',
+            cardBg: '#111827',
           },
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
@@ -26,191 +26,104 @@
     }
   </script>
 
-  <!-- Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" />
-
-  <!-- ScrollReveal -->
-  <script src="https://unpkg.com/scrollreveal"></script>
 </head>
 
 <body class="bg-darkBg text-white font-sans">
 
   <!-- HEADER -->
-  <header class="glass fixed w-full top-0 z-50 border-b border-gray-800 bg-black/70 backdrop-blur">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-4 h-16">
+  <header class="fixed w-full top-0 z-50 bg-black/80 backdrop-blur border-b border-gray-800">
+    <div class="max-w-6xl mx-auto flex items-center justify-between h-14 px-4">
       <!-- Logo -->
-      <a href="index.html" class="flex items-center gap-3">
-        <img src="./images/inmatch logo.png" class="h-10" alt="InMatch">
+      <a href="index.html" class="flex items-center gap-2">
+        <img src="./images/inmatch logo.png" class="h-8" alt="InMatch">
+        <span class="font-bold">InMatch</span>
       </a>
 
-      <!-- Nav -->
-      <nav class="hidden md:flex items-center gap-6 text-sm">
-        <a href="index.html" class="hover:text-brandYellow">Home</a>
-        <a href="#" class="hover:text-brandYellow">Leagues</a>
-        <a href="#" class="hover:text-brandYellow">Highlights</a>
-        <a href="#" class="hover:text-brandYellow">Live Scores</a>
-      </nav>
-
-      <!-- Right side -->
+      <!-- Search + Toggle -->
       <div class="flex items-center gap-4">
-        <!-- Admin -->
-        <a href="./admin/admin-login.html" class="hover:text-brandYellow">
-          <i class="fas fa-user text-xl"></i>
-        </a>
-        <!-- Dark mode -->
-        <button id="toggle-theme" class="hover:text-brandYellow">
-          <i class="fas fa-moon text-xl"></i>
-        </button>
+        <input type="text" placeholder="Search" class="hidden sm:block px-2 py-1 rounded bg-cardBg text-sm focus:outline-none"/>
+        <a href="./admin/admin-login.html" class="hover:text-brandYellow"><i class="fas fa-user text-lg"></i></a>
+        <button id="toggle-theme" class="hover:text-brandYellow"><i class="fas fa-moon text-lg"></i></button>
       </div>
     </div>
   </header>
 
-  <main class="pt-24">
+  <main class="pt-16 pb-20 max-w-3xl mx-auto px-3">
 
-    <!-- HERO -->
-<section class="relative h-[80vh] flex items-center justify-center">
-  <!-- Background image -->
-  <div class="absolute inset-0">
-    <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=1400&auto=format&fit=crop" 
-         alt="hero" 
-         class="w-full h-full object-cover">
-    <!-- Dark overlay -->
-    <div class="absolute inset-0 bg-black/60"></div>
-  </div>
-
-  <!-- Content -->
-  <div class="relative z-10 max-w-3xl text-center px-4">
-    <h1 class="text-4xl md:text-6xl font-extrabold text-brandGreen leading-tight">
-      The #1 Place for African Football Highlights
-    </h1>
-    <p class="mt-4 text-gray-200 text-lg">
-      Watch football highlights from Africa's biggest leagues and teams. 
-      Fast, focused, and built for fans.
-    </p>
-    <div class="mt-6 flex gap-3 flex-wrap justify-center">
-      <a href="#" class="px-5 py-3 bg-white text-black rounded-md font-semibold">Explore More Leagues</a>
-      <a href="#" class="px-5 py-3 bg-brandYellow text-black rounded-md font-semibold">Today's Matches</a>
+    <!-- NAV TABS -->
+    <div class="flex justify-around border-b border-gray-700 mb-4 text-sm">
+      <button class="tab-btn py-2 px-3 border-b-2 border-brandYellow font-semibold">Today</button>
+      <button class="tab-btn py-2 px-3 hover:text-brandYellow">Yesterday</button>
+      <button class="tab-btn py-2 px-3 hover:text-brandYellow">Tomorrow</button>
+      <button class="tab-btn py-2 px-3 hover:text-brandYellow">Live</button>
     </div>
-  </div>
-</section>
 
-
-    <!-- TRENDING HIGHLIGHTS -->
-    <section class="max-w-7xl mx-auto px-4 mt-16">
-      <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-semibold">Trending Highlights</h2>
-        <a href="#" class="text-sm text-gray-400 hover:text-brandYellow">View all</a>
-      </div>
-
-      <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <article class="bg-cardBg rounded-lg overflow-hidden shadow hover:scale-[1.02] transition">
-          <img src="https://images.unsplash.com/photo-1508804185872-d7badad00f7d?q=80&w=1200&auto=format&fit=crop" class="h-44 w-full object-cover"/>
-          <div class="p-4">
-            <h3 class="font-semibold">Manchester United 2 - 1 Chelsea</h3>
-            <p class="text-sm text-gray-400">Premier League</p>
+    <!-- MATCH LIST -->
+    <div id="matches-container" class="space-y-6">
+      <!-- Example League -->
+      <div>
+        <h2 class="text-brandGreen font-semibold mb-2">Premier League</h2>
+        <div class="bg-cardBg rounded-md p-3 flex justify-between items-center mb-2">
+          <div>
+            <p>Manchester United vs Chelsea</p>
+            <p class="text-sm text-gray-400">FT</p>
           </div>
-        </article>
+          <div class="font-bold">2 - 1</div>
+          <a href="#" class="text-sm text-brandYellow hover:underline">Highlights</a>
+        </div>
 
-        <article class="bg-cardBg rounded-lg overflow-hidden shadow hover:scale-[1.02] transition">
-          <img src="https://images.unsplash.com/photo-1542736667-069246bdbc16?q=80&w=1200&auto=format&fit=crop" class="h-44 w-full object-cover"/>
-          <div class="p-4">
-            <h3 class="font-semibold">Barcelona 3 - 0 Real Madrid</h3>
-            <p class="text-sm text-gray-400">La Liga</p>
+        <div class="bg-cardBg rounded-md p-3 flex justify-between items-center">
+          <div>
+            <p>Arsenal vs Liverpool</p>
+            <p class="text-sm text-gray-400">70’ Live</p>
           </div>
-        </article>
+          <div class="font-bold">1 - 1</div>
+          <span class="text-red-500 text-sm">LIVE</span>
+        </div>
+      </div>
 
-        <article class="bg-cardBg rounded-lg overflow-hidden shadow hover:scale-[1.02] transition">
-          <img src="https://images.unsplash.com/photo-1517927033932-b7d2e46f0f24?q=80&w=1200&auto=format&fit=crop" class="h-44 w-full object-cover"/>
-          <div class="p-4">
-            <h3 class="font-semibold">PSG 1 - 0 Lyon</h3>
-            <p class="text-sm text-gray-400">Ligue 1</p>
+      <!-- Another League -->
+      <div>
+        <h2 class="text-brandGreen font-semibold mb-2">La Liga</h2>
+        <div class="bg-cardBg rounded-md p-3 flex justify-between items-center mb-2">
+          <div>
+            <p>Barcelona vs Real Madrid</p>
+            <p class="text-sm text-gray-400">FT</p>
           </div>
-        </article>
+          <div class="font-bold">3 - 0</div>
+          <a href="#" class="text-sm text-brandYellow hover:underline">Highlights</a>
+        </div>
       </div>
-    </section>
-
-    <!-- LEAGUES -->
-    <section class="max-w-7xl mx-auto px-4 mt-16">
-      <h2 class="text-2xl font-semibold">Leagues</h2>
-      <div id="leagues-container" class="mt-6 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-        <!-- Leagues injected dynamically -->
-      </div>
-      <div class="text-center mt-8">
-        <button id="show-more-btn" class="px-5 py-3 bg-brandYellow text-black rounded-md font-semibold">Show More Leagues</button>
-      </div>
-    </section>
+    </div>
 
   </main>
 
-  <!-- FOOTER -->
-  <footer class="bg-black py-10 text-center text-sm mt-20">
-    <div class="mb-4 flex justify-center gap-6 text-xl">
-      <a href="#" class="hover:text-brandGreen"><i class="fab fa-facebook-f"></i></a>
-      <a href="#" class="hover:text-brandGreen"><i class="fab fa-twitter"></i></a>
-      <a href="https://www.instagram.com/inmatchdotcom" class="hover:text-brandGreen"><i class="fab fa-instagram"></i></a>
-      <a href="#" class="hover:text-brandGreen"><i class="fab fa-youtube"></i></a>
-    </div>
-    <p class="text-gray-400">&copy; 2025 InMatch. All rights reserved.</p>
-  </footer>
-
-  <!-- Mobile Bottom Nav -->
-  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 w-[92%] max-w-md bg-cardBg rounded-full p-2 flex justify-around md:hidden">
-    <a href="#" class="text-sm text-gray-300 hover:text-brandYellow">Home</a>
-    <a href="#" class="text-sm text-gray-300 hover:text-brandYellow">Highlights</a>
-    <a href="#" class="text-sm text-gray-300 hover:text-brandYellow">Leagues</a>
-    <a href="#" class="text-sm text-gray-300 hover:text-brandYellow">Profile</a>
+  <!-- MOBILE BOTTOM NAV -->
+  <nav class="fixed bottom-0 left-0 w-full bg-black/90 border-t border-gray-800 flex justify-around py-2 text-sm md:hidden">
+    <a href="#" class="flex flex-col items-center text-brandYellow">
+      <i class="fas fa-futbol"></i>
+      <span>Scores</span>
+    </a>
+    <a href="#" class="flex flex-col items-center">
+      <i class="fas fa-video"></i>
+      <span>Highlights</span>
+    </a>
+    <a href="#" class="flex flex-col items-center">
+      <i class="fas fa-trophy"></i>
+      <span>Leagues</span>
+    </a>
+    <a href="#" class="flex flex-col items-center">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
   </nav>
 
   <!-- SCRIPT -->
   <script>
-    const leaguesContainer = document.getElementById('leagues-container');
-    const showMoreBtn = document.getElementById('show-more-btn');
     const themeToggle = document.getElementById('toggle-theme');
     const html = document.documentElement;
-    const API_BASE = "https://inmatch-backend-0csv.onrender.com";
-
-    let allLeagues = [];
-    let displayedCount = 0;
-    const STEP = 6;
-
-    async function fetchLeagues() {
-      try {
-        const res = await fetch(`${API_BASE}/api/leagues`);
-        allLeagues = await res.json();
-      } catch (err) {
-        leaguesContainer.innerHTML = '<p class="text-red-500">Error loading leagues.</p>';
-      }
-    }
-
-    function renderMoreLeagues() {
-      const nextBatch = allLeagues.slice(displayedCount, displayedCount + STEP);
-      nextBatch.forEach(league => {
-        const card = document.createElement('a');
-        card.href = `match.html?leagueId=${league._id}`;
-        card.className = 'bg-cardBg rounded-lg p-4 flex flex-col items-center hover:scale-[1.05] transition';
-        card.innerHTML = `
-          <div class="w-16 h-16 bg-gray-700 rounded-full overflow-hidden mb-3">
-            <img src="${league.logo}" alt="${league.name}" class="w-full h-full object-cover"/>
-          </div>
-          <h3 class="text-sm">${league.name}</h3>
-        `;
-        leaguesContainer.appendChild(card);
-      });
-      displayedCount += nextBatch.length;
-      if (displayedCount >= allLeagues.length) {
-        showMoreBtn.disabled = true;
-        showMoreBtn.classList.add('opacity-50','cursor-not-allowed');
-        showMoreBtn.textContent = 'No More Leagues';
-      }
-    }
-
-    showMoreBtn.addEventListener('click', async () => {
-      await fetchLeagues();
-      renderMoreLeagues();
-    });
 
     themeToggle.addEventListener('click', () => {
       html.classList.toggle('dark');
@@ -219,10 +132,8 @@
       icon.classList.toggle('fa-sun');
     });
 
-    (async () => {
-      await fetchLeagues();
-      renderMoreLeagues();
-    })();
+    // Later, you’ll fetch matches from your backend
+    // and render them inside #matches-container dynamically.
   </script>
 </body>
 </html>
