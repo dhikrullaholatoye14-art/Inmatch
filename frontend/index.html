@@ -71,25 +71,32 @@
   <main class="pt-24">
 
     <!-- HERO -->
-    <section class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-10 items-center">
-      <div>
-        <h1 class="text-4xl md:text-5xl font-extrabold text-brandGreen leading-tight">
-          The #1 Place for African Football Highlights
-        </h1>
-        <p class="mt-4 text-gray-300">
-          Watch football highlights from Africa's biggest leagues and teams. Fast, focused, and built for fans.
-        </p>
+<section class="relative h-[80vh] flex items-center justify-center">
+  <!-- Background image -->
+  <div class="absolute inset-0">
+    <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=1400&auto=format&fit=crop" 
+         alt="hero" 
+         class="w-full h-full object-cover">
+    <!-- Dark overlay -->
+    <div class="absolute inset-0 bg-black/60"></div>
+  </div>
 
-        <div class="mt-6 flex gap-3 flex-wrap">
-          <a href="#" class="px-5 py-3 bg-white text-black rounded-md font-semibold">Explore More Leagues</a>
-          <a href="#" class="px-5 py-3 bg-brandYellow text-black rounded-md font-semibold">Today's Matches</a>
-        </div>
-      </div>
+  <!-- Content -->
+  <div class="relative z-10 max-w-3xl text-center px-4">
+    <h1 class="text-4xl md:text-6xl font-extrabold text-brandGreen leading-tight">
+      The #1 Place for African Football Highlights
+    </h1>
+    <p class="mt-4 text-gray-200 text-lg">
+      Watch football highlights from Africa's biggest leagues and teams. 
+      Fast, focused, and built for fans.
+    </p>
+    <div class="mt-6 flex gap-3 flex-wrap justify-center">
+      <a href="#" class="px-5 py-3 bg-white text-black rounded-md font-semibold">Explore More Leagues</a>
+      <a href="#" class="px-5 py-3 bg-brandYellow text-black rounded-md font-semibold">Today's Matches</a>
+    </div>
+  </div>
+</section>
 
-      <div class="rounded-xl overflow-hidden shadow-lg">
-        <img src="https://images.unsplash.com/photo-1521412644187-c49fa049e84d?q=80&w=1400&auto=format&fit=crop" alt="hero" class="w-full object-cover h-72 md:h-full"/>
-      </div>
-    </section>
 
     <!-- TRENDING HIGHLIGHTS -->
     <section class="max-w-7xl mx-auto px-4 mt-16">
