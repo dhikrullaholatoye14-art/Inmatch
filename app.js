@@ -120,6 +120,17 @@ app.set('io', io);
 process.on('unhandledRejection', (reason) => console.error('Unhandled Rejection:', reason));
 process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
 
+// Debug route to check environment variables
+app.get('/debug-env', (req, res) => {
+  res.json({
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME || "❌ Not set",
+    apiKey: process.env.CLOUDINARY_API_KEY ? "✅ Exists" : "❌ Missing",
+    apiSecret: process.env.CLOUDINARY_API_SECRET ? "✅ Exists" : "❌ Missing"
+  });
+});
+
+
+
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
