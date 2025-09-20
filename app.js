@@ -19,6 +19,7 @@ const leagueRoutes = require('./routes/leagueRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const matchDetailsRoutes = require('./routes/matchDetails');
 const adminRoutes = require('./routes/adminRoutes');
+const videoRoutes = require("./routes/videoRoutes");
 
 // ✅ Start cron job for cleaning old videos
 require('./utils/cleanupVideo');
@@ -72,6 +73,12 @@ app.use((err, req, res, next) => {
   }
   res.status(status).json(payload);
 });
+
+
+
+// ...
+app.use("/api/videos", videoRoutes);
+
 
 // ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {

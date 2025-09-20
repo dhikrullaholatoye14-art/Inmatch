@@ -1,3 +1,5 @@
+// public/js/manage-matchDetails.js
+
 document.addEventListener('DOMContentLoaded', async () => {
   const matchInfoContainer = document.getElementById('match-info');
   const matchStatsContainer = document.getElementById('match-stats');
@@ -15,14 +17,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const addVideoBtn = document.getElementById('addVideo');
   const logoutBtn = document.getElementById('logoutBtn');
 
-  const API_BASE = "https://inmatch-backend-0csv.onrender.com";
+  // ✅ Use your deployed backend base
+  const API_BASE = "https://inmatch-backend.onrender.com";
 
-  // ---- Single source of truth for videos shown in the form and preview
   let videosState = [];
   let matchDetailsExist = false;
   let isUploading = false;
 
-  // ---- Helpers
+  // Helpers
   function isDirectVideoFile(src) {
     return /\.(mp4|webm|ogg)(\?.*)?$/i.test(src);
   }
@@ -44,11 +46,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     videosState.forEach(video => {
       const src = video.videoUrl || '';
       if (!video.isURL) {
-        // Local uploaded video file -> serve via API_BASE
         videosRender.innerHTML += `
           <div><strong>${video.title || ''}</strong><br>
             <video width="320" controls>
-              <source src="${API_BASE}/${src}" type="video/mp4">
+              <source src="${src}" type="video/mp4">
               Your browser does not support the video tag.
             </video>
           </div>`;
@@ -62,15 +63,13 @@ document.addEventListener('DOMContentLoaded', async () => {
               </video>
             </div>`;
         } else {
-          videosRender.innerHTML += `
-            <div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
+          videosRender.innerHTML += `<div><a href="${src}" target="_blank">${video.title || src}</a></div>`;
         }
       }
     });
   }
 
   function renderVideoInputs() {
-    // Clear and rebuild the form inputs based on videosState
     videoDetailsContainer.innerHTML = '';
 
     videosState.forEach((v, idx) => {
@@ -81,7 +80,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       div.innerHTML = `
         <input type="text" placeholder="Video Title" value="${v.title || ''}" />
         <input type="text" placeholder="Video URL" value="${v.isURL ? (v.videoUrl || '') : ''}" ${v.isURL ? '' : 'disabled'} />
-        <input type="file" name="video" accept="video/mp4,video/webm,video/ogg" ${v.isURL ? '' : ''} />
+        <input type="file" name="video" accept="video/*" />
         <button type="button" class="removeVideo">❌</button>
         <span class="hint" style="font-size:12px;opacity:.8;margin-left:6px;">
           ${v.isURL ? 'URL mode' : 'Uploaded file'}
@@ -89,12 +88,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       `;
 
       // Title change
-      const titleInput = div.querySelector('input[placeholder="Video Title"]');
-      titleInput.addEventListener('input', (e) => {
+      div.querySelector('input[placeholder="Video Title"]').addEventListener('input', (e) => {
         videosState[idx].title = e.target.value;
       });
 
-      // URL change (only for isURL items)
+      // URL change
       const urlInput = div.querySelector('input[placeholder="Video URL"]');
       if (v.isURL) {
         urlInput.addEventListener('input', (e) => {
@@ -102,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       }
 
-      // File upload handler (if user picks a file, we upload immediately and convert item -> isURL:false)
+      // File upload handler
       const fileInput = div.querySelector('input[type="file"]');
       fileInput.addEventListener('change', async (e) => {
         if (!e.target.files || !e.target.files.length) return;
@@ -125,43 +123,24 @@ document.addEventListener('DOMContentLoaded', async () => {
           formData.append('video', file);
           formData.append('title', videosState[idx].title || file.name);
 
-          const xhr = new XMLHttpRequest();
-          xhr.open('POST', `${API_BASE}/api/videos/upload`, true);
-          xhr.upload.onprogress = (ev) => {
-            if (ev.lengthComputable) progressBar.value = (ev.loaded / ev.total) * 100;
-          };
-
-          const uploadPromise = new Promise((resolve, reject) => {
-            xhr.onload = () => {
-              div.removeChild(progressBar);
-              if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                  resolve(JSON.parse(xhr.responseText));
-                } catch (parseErr) {
-                  reject('Bad JSON from server');
-                }
-              } else {
-                reject(xhr.responseText);
-              }
-            };
-            xhr.onerror = () => {
-              div.removeChild(progressBar);
-              reject('Network error during upload');
-            };
+          // ✅ FIX: use fetch instead of raw XHR for clarity
+          const res = await fetch(`${API_BASE}/api/videos/upload`, {
+            method: 'POST',
+            body: formData
           });
 
-          xhr.send(formData);
-          const data = await uploadPromise;
+          div.removeChild(progressBar);
+
+          if (!res.ok) throw new Error(await res.text());
+          const data = await res.json();
 
           if (data && data.video && data.video.videoUrl) {
-            // Convert this entry to uploaded-file mode
             videosState[idx] = {
               _id: data.video._id,
               title: data.video.title,
               videoUrl: data.video.videoUrl,
               isURL: false
             };
-            // Re-render to reflect state (disables URL input, etc.)
             renderVideoInputs();
             renderVideosPreview();
           } else {
@@ -175,7 +154,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       });
 
-      // Remove (frontend-only) — immediate removal from state + re-render
+      // Remove
       div.querySelector('.removeVideo').addEventListener('click', () => {
         videosState.splice(idx, 1);
         renderVideoInputs();
@@ -186,23 +165,23 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Add new blank video row (defaults to URL mode)
+  // Add blank video row
   addVideoBtn.addEventListener('click', () => {
     videosState.push({ title: '', videoUrl: '', isURL: true });
     renderVideoInputs();
   });
 
-  // ✅ FIX: Add goal buttons (re-attached)
+  // Goals
   addGoalTeam1Btn.addEventListener('click', () => addGoalInput('team1'));
   addGoalTeam2Btn.addEventListener('click', () => addGoalInput('team2'));
 
-  // Auth/logout (unchanged)
+  // Logout
   logoutBtn.addEventListener('click', () => {
     localStorage.removeItem('authToken');
     window.location.href = 'admin-login.html';
   });
 
-  // ---- Match ID bootstrapping
+  // Match ID
   let matchId = new URLSearchParams(window.location.search).get('matchId')
     || localStorage.getItem('currentMatchId')
     || sessionStorage.getItem('currentMatchId');
@@ -249,7 +228,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const { details } = await res.json();
       matchDetailsExist = true;
 
-      // Stats
       matchStatsContainer.innerHTML =
         `<h3>Match Statistics</h3>
          <p><strong>Ball Possession:</strong> ${details.stats?.possession || "0 - 0"}</p>
@@ -257,7 +235,6 @@ document.addEventListener('DOMContentLoaded', async () => {
          <p><strong>Corners:</strong> ${details.stats?.corners || "0 - 0"}</p>
          <p><strong>Fouls:</strong> ${details.stats?.fouls || "0 - 0"}</p>`;
 
-      // Goals
       const goalsTeam1 = details.goalsDetails?.team1 || [];
       const goalsTeam2 = details.goalsDetails?.team2 || [];
       if (goalsTeam1.length || goalsTeam2.length) {
@@ -266,18 +243,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (goalsTeam2.length) matchStatsContainer.innerHTML += `<p><strong>Team 2:</strong> ${goalsTeam2.map(g => `${g.player} (${g.time})`).join(', ')}</p>`;
       }
 
-      // Populate inputs
       ballPossessionInput.value = details.stats?.possession || "";
       shotsOnTargetInput.value = details.stats?.shots || "";
       cornersInput.value = details.stats?.corners || "";
       foulsInput.value = details.stats?.fouls || "";
 
-      // Goals form
       goalDetailsContainer.innerHTML = '';
       goalsTeam1.forEach(g => addGoalInput('team1', g.player, g.time));
       goalsTeam2.forEach(g => addGoalInput('team2', g.player, g.time));
 
-      // ---- VIDEOS: hydrate state from server and render
       videosState = Array.isArray(details.videos) ? details.videos.map(v => ({
         _id: v._id, title: v.title, videoUrl: v.videoUrl, isURL: !!v.isURL
       })) : [];
@@ -300,7 +274,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       fouls: foulsInput.value
     };
 
-    // Read goals back from form
     const updatedGoalsTeam1 = Array.from(goalDetailsContainer.querySelectorAll('.goal-input.goal-team1'))
       .map(g => ({ player: g.querySelector('input[placeholder="Player Name"]').value.trim(), time: g.querySelector('input[placeholder="Goal Time"]').value.trim() }))
       .filter(g => g.player && g.time);
@@ -309,15 +282,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       .map(g => ({ player: g.querySelector('input[placeholder="Player Name"]').value.trim(), time: g.querySelector('input[placeholder="Goal Time"]').value.trim() }))
       .filter(g => g.player && g.time);
 
-    // ---- videos: send the authoritative state (no DOM scraping)
     const payload = {
       stats: updatedStats,
       goalsDetails: { team1: updatedGoalsTeam1, team2: updatedGoalsTeam2 },
-      videos: videosState.filter(v => v.title && v.videoUrl) // basic guard
+      videos: videosState.filter(v => v.title && v.videoUrl)
     };
 
     try {
-      console.log('Submitting payload:', payload);
       const res = await fetch(API_MATCH_DETAILS_URL, {
         method: matchDetailsExist ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
@@ -332,7 +303,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Goals UI
   function addGoalInput(team, player = '', time = '') {
     const div = document.createElement('div');
     div.className = `goal-input goal-${team}`;
@@ -344,7 +314,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     goalDetailsContainer.appendChild(div);
   }
 
-  // Initial fetches
   if (matchId) {
     await fetchMatchOverview();
     await fetchMatchDetails();

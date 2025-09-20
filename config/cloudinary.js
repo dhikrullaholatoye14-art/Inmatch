@@ -1,16 +1,17 @@
 // config/cloudinary.js
-const cloudinary = require('cloudinary').v2;
+const cloudinary = require("cloudinary").v2;
 
-console.log("🔍 Setting Cloudinary config with:");
-console.log("CLOUD_NAME:", process.env.CLOUDINARY_CLOUD_NAME);
-console.log("API_KEY:", process.env.CLOUDINARY_API_KEY ? "✅ Exists" : "❌ Missing");
-console.log("API_SECRET:", process.env.CLOUDINARY_API_SECRET ? "✅ Exists" : "❌ Missing");
-
+// Ensure config is applied from environment variables
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-  secure: true,
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.CLOUD_API_KEY,
+  api_secret: process.env.CLOUD_API_SECRET,
+});
+
+console.log("🔍 Cloudinary configured with:", {
+  CLOUD_NAME: process.env.CLOUD_NAME,
+  API_KEY: process.env.CLOUD_API_KEY ? "✅ Exists" : "❌ Missing",
+  API_SECRET: process.env.CLOUD_API_SECRET ? "✅ Exists" : "❌ Missing",
 });
 
 module.exports = cloudinary;
