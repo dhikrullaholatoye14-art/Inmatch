@@ -1,10 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const Video = require('../models/video');
 const { v2: cloudinary } = require('cloudinary');
+const streamifier = require('streamifier'); // ✅ helps stream buffer to Cloudinary
 
 // ✅ Ensure Cloudinary is configured from .env
 cloudinary.config({
@@ -13,27 +12,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// ---- Normalize uploads dir
-const UPLOADS_DIR = path.resolve(__dirname, '../src/uploads');
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-}
-
-// ---- Multer storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, UPLOADS_DIR);
-  },
-  filename: function (req, file, cb) {
-    const base = path.basename(file.originalname).replace(/\s+/g, '-');
-    const uniqueName = `${Date.now()}-${base}`;
-    cb(null, uniqueName);
-  }
-});
-
+// ---- Multer (store file in memory instead of disk)
+const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB max
   fileFilter: (req, file, cb) => {
     if (file.mimetype && file.mimetype.startsWith('video/')) return cb(null, true);
     cb(new Error('Only video files are allowed'));
@@ -41,7 +24,7 @@ const upload = multer({
 });
 
 // ---- POST /api/videos/upload
-router.post('/upload', (req, res, next) => {
+router.post('/upload', (req, res) => {
   upload.single('video')(req, res, async (err) => {
     if (err) {
       console.error("Multer error:", err.message);
@@ -51,13 +34,26 @@ router.post('/upload', (req, res, next) => {
     try {
       if (!req.file) return res.status(400).json({ message: 'No video file uploaded' });
 
-      // ✅ Upload file to Cloudinary
-      const cloudRes = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "video",
-        folder: "inmatch_videos"
-      });
+      // ✅ Upload directly to Cloudinary via stream
+      const streamUpload = (fileBuffer) => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              resource_type: "video",
+              folder: "inmatch_videos"
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          streamifier.createReadStream(fileBuffer).pipe(stream);
+        });
+      };
 
-      // Save Cloudinary details in DB
+      const cloudRes = await streamUpload(req.file.buffer);
+
+      // ✅ Save Cloudinary details in DB
       const newVideo = new Video({
         title: req.body.title || req.file.originalname,
         videoUrl: cloudRes.secure_url,
@@ -66,9 +62,6 @@ router.post('/upload', (req, res, next) => {
       });
 
       await newVideo.save();
-
-      // Cleanup local temp file
-      fs.unlinkSync(req.file.path);
 
       return res.status(201).json({
         message: 'Video uploaded successfully',
@@ -81,8 +74,11 @@ router.post('/upload', (req, res, next) => {
         }
       });
     } catch (err) {
-      console.error('Upload error:', err);
-      return res.status(500).json({ message: 'Internal Server Error' });
+      console.error("Upload error details:", err); // ✅ log full error
+      return res.status(500).json({
+        message: 'Upload failed',
+        error: err.message || err.toString()
+      });
     }
   });
 });
@@ -100,15 +96,6 @@ router.delete('/:id', async (req, res) => {
         console.log("Deleted from Cloudinary:", v.public_id);
       } catch (e) {
         console.warn("Cloudinary delete failed:", e.message);
-      }
-    } else {
-      // Legacy support: try removing from local disk if it was saved locally
-      if (v.isURL === false && v.videoUrl) {
-        const fileOnDisk = path.join(UPLOADS_DIR, path.basename(v.videoUrl));
-        if (fs.existsSync(fileOnDisk)) {
-          fs.unlinkSync(fileOnDisk);
-          console.log("Deleted local file:", fileOnDisk);
-        }
       }
     }
 
