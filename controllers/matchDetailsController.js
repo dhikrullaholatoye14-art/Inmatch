@@ -104,21 +104,33 @@ exports.updateMatchDetails = async (req, res) => {
             update.videos = await Promise.all(
                 videos.map(async (v) => {
                     if (v.filePath) {
-                        // Upload to Cloudinary if a new file is passed
-                        const result = await cloudinary.uploader.upload(v.filePath, {
-                            resource_type: "video",
-                            folder: "inmatch/videos",
+                        console.log("🚀 Attempting Cloudinary upload with config:", {
+                            cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+                            apiKey: process.env.CLOUDINARY_API_KEY ? "✅ Exists" : "❌ Missing",
+                            apiSecret: process.env.CLOUDINARY_API_SECRET ? "✅ Exists" : "❌ Missing"
                         });
 
-                        // Remove local file
-                        try { fs.unlinkSync(v.filePath); } catch {}
+                        try {
+                            const result = await cloudinary.uploader.upload(v.filePath, {
+                                resource_type: "video",
+                                folder: "inmatch/videos",
+                            });
 
-                        return {
-                            title: v.title,
-                            videoUrl: result.secure_url,
-                            public_id: result.public_id,
-                            isURL: false,
-                        };
+                            console.log("✅ Cloudinary upload success:", result.secure_url);
+
+                            // Remove local file
+                            try { fs.unlinkSync(v.filePath); } catch {}
+
+                            return {
+                                title: v.title,
+                                videoUrl: result.secure_url,
+                                public_id: result.public_id,
+                                isURL: false,
+                            };
+                        } catch (uploadErr) {
+                            console.error("❌ Cloudinary upload failed:", uploadErr);
+                            throw uploadErr;
+                        }
                     }
 
                     // Existing video (keep as is)
@@ -144,6 +156,6 @@ exports.updateMatchDetails = async (req, res) => {
 
     } catch (err) {
         console.error('match-details PATCH error:', err);
-        return res.status(500).json({ message: 'Internal Server Error' });
+        return res.status(500).json({ message: 'Internal Server Error', error: err.message });
     }
 };
