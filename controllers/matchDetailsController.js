@@ -4,6 +4,36 @@ const Match = require('../models/Match');
 const cloudinary = require("../config/cloudinary"); // ✅ Cloudinary config
 const fs = require("fs");
 
+// ✅ Helper function for Cloudinary upload
+async function uploadToCloudinary(filePath, title) {
+    console.log("🚀 Attempting Cloudinary upload with config:", {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY ? "✅ Exists" : "❌ Missing",
+        apiSecret: process.env.CLOUDINARY_API_SECRET ? "✅ Exists" : "❌ Missing"
+    });
+    console.log("📂 Uploading file:", filePath);
+
+    try {
+        const result = await cloudinary.uploader.upload(filePath, {
+            resource_type: "video",
+            folder: "inmatch/videos",
+        });
+
+        console.log("✅ Cloudinary upload success:", result.secure_url);
+
+        try { fs.unlinkSync(filePath); } catch {}
+        return {
+            title,
+            videoUrl: result.secure_url,
+            public_id: result.public_id,
+            isURL: false,
+        };
+    } catch (err) {
+        console.error("❌ Cloudinary upload failed:", err.message, err);
+        throw err;
+    }
+}
+
 // ✅ Get Match Details by Match ID
 exports.getMatchDetails = async (req, res) => {
     const { matchId } = req.params;
@@ -94,9 +124,9 @@ exports.updateMatchDetails = async (req, res) => {
             for (const publicId of orphaned) {
                 try {
                     await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
-                    console.log(`Deleted orphaned video from Cloudinary: ${publicId}`);
+                    console.log(`🗑️ Deleted orphaned video from Cloudinary: ${publicId}`);
                 } catch (err) {
-                    console.error(`Failed to delete video ${publicId} from Cloudinary:`, err);
+                    console.error(`❌ Failed to delete video ${publicId} from Cloudinary:`, err);
                 }
             }
 
@@ -104,33 +134,7 @@ exports.updateMatchDetails = async (req, res) => {
             update.videos = await Promise.all(
                 videos.map(async (v) => {
                     if (v.filePath) {
-                        console.log("🚀 Attempting Cloudinary upload with config:", {
-                            cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-                            apiKey: process.env.CLOUDINARY_API_KEY ? "✅ Exists" : "❌ Missing",
-                            apiSecret: process.env.CLOUDINARY_API_SECRET ? "✅ Exists" : "❌ Missing"
-                        });
-
-                        try {
-                            const result = await cloudinary.uploader.upload(v.filePath, {
-                                resource_type: "video",
-                                folder: "inmatch/videos",
-                            });
-
-                            console.log("✅ Cloudinary upload success:", result.secure_url);
-
-                            // Remove local file
-                            try { fs.unlinkSync(v.filePath); } catch {}
-
-                            return {
-                                title: v.title,
-                                videoUrl: result.secure_url,
-                                public_id: result.public_id,
-                                isURL: false,
-                            };
-                        } catch (uploadErr) {
-                            console.error("❌ Cloudinary upload failed:", uploadErr);
-                            throw uploadErr;
-                        }
+                        return await uploadToCloudinary(v.filePath, v.title);
                     }
 
                     // Existing video (keep as is)
@@ -155,7 +159,7 @@ exports.updateMatchDetails = async (req, res) => {
         return res.json({ details: doc });
 
     } catch (err) {
-        console.error('match-details PATCH error:', err);
+        console.error('❌ match-details PATCH error:', err.message, err.stack);
         return res.status(500).json({ message: 'Internal Server Error', error: err.message });
     }
 };
