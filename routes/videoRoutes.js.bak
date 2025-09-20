@@ -4,14 +4,6 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const Video = require('../models/video');
-const { v2: cloudinary } = require('cloudinary');
-
-// ✅ Ensure Cloudinary is configured from .env
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
 
 // ---- Normalize uploads dir
 const UPLOADS_DIR = path.resolve(__dirname, '../src/uploads');
@@ -48,27 +40,23 @@ router.post('/upload', (req, res, next) => {
       return res.status(400).json({ message: err.message });
     }
 
+    console.log("UPLOAD HIT:", req.file);
+
     try {
+      const { title = '' } = req.body;
       if (!req.file) return res.status(400).json({ message: 'No video file uploaded' });
 
-      // ✅ Upload file to Cloudinary
-      const cloudRes = await cloudinary.uploader.upload(req.file.path, {
-        resource_type: "video",
-        folder: "inmatch_videos"
-      });
+      // ---- Build absolute HTTPS URL (force https:// even if req.protocol is http)
+      const host = req.get('host');
+      const fullUrl = `https://${host}/uploads/${req.file.filename}`;
 
-      // Save Cloudinary details in DB
       const newVideo = new Video({
-        title: req.body.title || req.file.originalname,
-        videoUrl: cloudRes.secure_url,
-        public_id: cloudRes.public_id,
+        title: title || req.file.originalname,
+        videoUrl: fullUrl,   // ✅ now stores full HTTPS URL
         isURL: false
       });
 
       await newVideo.save();
-
-      // Cleanup local temp file
-      fs.unlinkSync(req.file.path);
 
       return res.status(201).json({
         message: 'Video uploaded successfully',
@@ -76,7 +64,6 @@ router.post('/upload', (req, res, next) => {
           _id: newVideo._id,
           title: newVideo.title,
           videoUrl: newVideo.videoUrl,
-          public_id: newVideo.public_id,
           isURL: newVideo.isURL
         }
       });
@@ -93,26 +80,14 @@ router.delete('/:id', async (req, res) => {
     const v = await Video.findById(req.params.id);
     if (!v) return res.status(404).json({ message: 'Not found' });
 
-    // ✅ If video is stored in Cloudinary, delete there first
-    if (v.public_id) {
-      try {
-        await cloudinary.uploader.destroy(v.public_id, { resource_type: "video" });
-        console.log("Deleted from Cloudinary:", v.public_id);
-      } catch (e) {
-        console.warn("Cloudinary delete failed:", e.message);
-      }
-    } else {
-      // Legacy support: try removing from local disk if it was saved locally
-      if (v.isURL === false && v.videoUrl) {
-        const fileOnDisk = path.join(UPLOADS_DIR, path.basename(v.videoUrl));
-        if (fs.existsSync(fileOnDisk)) {
-          fs.unlinkSync(fileOnDisk);
-          console.log("Deleted local file:", fileOnDisk);
-        }
+    if (v.isURL === false && v.videoUrl) {
+      const fileOnDisk = path.join(UPLOADS_DIR, path.basename(v.videoUrl));
+      if (fs.existsSync(fileOnDisk)) {
+        fs.unlinkSync(fileOnDisk);
+        console.log("Deleted file:", fileOnDisk);
       }
     }
 
-    // ✅ Remove from DB
     await v.deleteOne();
     return res.json({ message: 'Deleted', id: req.params.id });
   } catch (err) {

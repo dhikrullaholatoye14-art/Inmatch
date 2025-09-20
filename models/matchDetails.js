@@ -11,7 +11,9 @@ const matchDetailsSchema = new Schema({
   videos: [
     {
       title: { type: String, required: true },
-      videoUrl: { type: String, required: true }
+      videoUrl: { type: String, required: true },
+      public_id: { type: String, default: null }, // ✅ Cloudinary public ID
+      isURL: { type: Boolean, default: false }    // ✅ Distinguish file vs link
     }
   ],
   stats: {
