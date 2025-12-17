@@ -7,6 +7,7 @@ const path = require('path');
 const cors = require('cors');
 const fs = require('fs');
 
+
 // Load environment variables
 dotenv.config();
 
@@ -18,6 +19,7 @@ const leagueRoutes = require('./routes/leagueRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const matchDetailsRoutes = require('./routes/matchDetails');
 const adminRoutes = require('./routes/adminRoutes');
+const videoRoutes = require("./routes/videoRoutes");
 
 // ✅ Start cron job for cleaning old videos
 require('./utils/cleanupVideo');
@@ -50,6 +52,8 @@ if (!fs.existsSync(UPLOADS_DIR)) {
 }
 app.use('/uploads', express.static(UPLOADS_DIR));
 
+ 
+
 // ✅ API Routes
 app.use('/api/videos', videoRoutes);
 app.use('/api/leagues', leagueRoutes);
@@ -69,6 +73,12 @@ app.use((err, req, res, next) => {
   }
   res.status(status).json(payload);
 });
+
+
+
+// ...
+app.use("/api/videos", videoRoutes);
+
 
 // ✅ MongoDB Connection
 mongoose.connect(process.env.MONGO_URI, {
@@ -97,7 +107,7 @@ io.on('connection', (socket) => {
   console.log('A user connected:', socket.id);
 
   socket.on('joinMatch', (matchId) => {
-    console.log(`User joined match room: ${matchId}`);
+    console.log(User joined match room: ${matchId});
     socket.join(matchId);
   });
 
@@ -126,9 +136,11 @@ app.get('/debug-env', (req, res) => {
   });
 });
 
+
+
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(🚀 Server running on port ${PORT});
   console.log('Routes active: /api/videos, /api/leagues, /api/matches, /api/match-details, /api/admins');
 });
