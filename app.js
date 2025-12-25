@@ -2,55 +2,27 @@ const express = require('express');
 
 const mongoose = require('mongoose');
 
-const jwt = require('jsonwebtoken');
-
 const dotenv = require('dotenv');
 
 const http = require('http');
 
 const { Server } = require('socket.io');
 
+const path = require('path');
+
 const cors = require('cors');
+
+const fs = require('fs');
+
+// Load environment variables
 
 dotenv.config();
 
 const app = express();
 
-// Middleware to parse JSON bodies
+// ✅ Routes
 
-app.use(express.json());
-
-// CORS configuration to allow all origins, adjust based on your environment
-
-app.use(cors({
-
-origin: '*', // Or specify allowed domains like 'http://localhost:3000'
-
-methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
-
-}));
-
-app.use(express.static('frontend-admin'));
-
-// MongoDB Connection
-
-mongoose.connect(process.env.MONGO_URI, {
-
-useNewUrlParser: true,
-
-useUnifiedTopology: true,
-
-})
-
-.then(() => console.log('Connected to MongoDB'))
-
-.catch((err) => console.log('Error connecting to MongoDB:', err));
-
-// Import Models
-
-require('./models/matchDetails'); // Importing the matchDetails model
-
-// Import Routes
+const videoRoutes = require('./routes/videoRoutes');
 
 const leagueRoutes = require('./routes/leagueRoutes');
 
@@ -60,15 +32,119 @@ const matchDetailsRoutes = require('./routes/matchDetails');
 
 const adminRoutes = require('./routes/adminRoutes');
 
-// Use Routes
+const videoRoutes = require("./routes/videoRoutes");
+
+// ✅ Start cron job for cleaning old videos
+
+require('./utils/cleanupVideo');
+
+// ✅ CORS Middleware
+
+app.use(cors({
+
+origin: process.env.NODE_ENV === 'production'
+
+? 'https://www.inmatch.com.ng'
+
+: ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://www.inmatch.com.ng'],
+
+methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+
+credentials: true
+
+}));
+
+app.use((req, res, next) => {
+
+console.log("➡️ Incoming:", req.method, req.url);
+
+next();
+
+});
+
+// ✅ Body parsers
+
+app.use(express.json({ limit: '10mb' }));
+
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// ✅ Serve admin frontend
+
+app.use(express.static('frontend-admin'));
+
+// ✅ Serve uploaded videos folder consistently from /src/uploads
+
+const UPLOADS_DIR = path.resolve(__dirname, 'src', 'uploads');
+
+if (!fs.existsSync(UPLOADS_DIR)) {
+
+fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+
+}
+
+app.use('/uploads', express.static(UPLOADS_DIR));
+
+// ✅ API Routes
+
+app.use('/api/videos', videoRoutes);
 
 app.use('/api/leagues', leagueRoutes);
 
 app.use('/api/matches', matchRoutes);
 
-app.use('/api/match-details' , matchDetailsRoutes);
+app.use('/api/match-details', matchDetailsRoutes);
 
-app.use('/api/admins', adminRoutes); // Admin routes
+app.use('/api/admins', adminRoutes);
+
+// ✅ Global JSON error handler
+
+app.use((err, req, res, next) => {
+
+console.error(err);
+
+const status = err.status || 500;
+
+const payload = {
+
+message: err.message || 'Internal Server Error',
+
+};
+
+if (process.env.NODE_ENV !== 'production') {
+
+payload.stack = err.stack;
+
+}
+
+res.status(status).json(payload);
+
+});
+
+// ...
+
+app.use("/api/videos", videoRoutes);
+
+// ✅ MongoDB Connection
+
+mongoose.connect(process.env.MONGO_URI, {
+
+useNewUrlParser: true,
+
+useUnifiedTopology: true
+
+})
+
+.then(() => console.log('✅ Connected to MongoDB'))
+
+.catch(err => console.log('❌ Error connecting to MongoDB:', err));
+
+// Import Models
+
+require('./models/matchDetails'); // keep lowercase for consistency
+
+require('./models/video'); // ensure video model is loaded
+
+// ✅ Socket.io setup
 
 const server = http.createServer(app);
 
@@ -76,11 +152,15 @@ const io = new Server(server, {
 
 cors: {
 
-origin: '*', // Allow all origins, adjust based on your setup
+origin: process.env.NODE_ENV === 'production'
 
-methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
+  ? 'https://www.inmatch.com.ng'
 
-},
+  : ['http://localhost:3000', 'http://127.0.0.1:3000', 'https://www.inmatch.com.ng'],
+
+methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE']
+
+}
 
 });
 
@@ -114,10 +194,36 @@ console.log('A user disconnected:', socket.id);
 
 app.set('io', io);
 
+// ✅ Safety logging
+
+process.on('unhandledRejection', (reason) => console.error('Unhandled Rejection:', reason));
+
+process.on('uncaughtException', (err) => console.error('Uncaught Exception:', err));
+
+// Debug route to check environment variables
+
+app.get('/debug-env', (req, res) => {
+
+res.json({
+
+cloudName: process.env.CLOUDINARY_CLOUD_NAME || "❌ Not set",
+
+apiKey: process.env.CLOUDINARY_API_KEY ? "✅ Exists" : "❌ Missing",
+
+apiSecret: process.env.CLOUDINARY_API_SECRET ? "✅ Exists" : "❌ Missing"
+
+});
+
+});
+
+// ✅ Start server
+
 const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
 
-console.log(Server is running on port ${PORT});
+console.log(🚀 Server running on port ${PORT});
+
+console.log('Routes active: /api/videos, /api/leagues, /api/matches, /api/match-details, /api/admins');
 
 });
