@@ -6,7 +6,10 @@ const { uploadVideo } = require("../controllers/videoController");
 
 // ✅ Multer setup (temporary storage before Cloudinary)
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => {
+    const uploadPath = path.resolve(__dirname, "..", "src", "uploads");
+    cb(null, uploadPath);
+  },
   filename: (req, file, cb) => {
     cb(null, Date.now() + path.extname(file.originalname));
   }
